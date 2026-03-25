@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-utils/schema.json",
+  "productName": "SNATCH",
+  "version": "1.0.0",
+  "identifier": "com.snatch.app",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "SNATCH",
+        "width": 1000,
+        "height": 700,
+        "minWidth": 800,
+        "minHeight": 600,
+        "decorations": false,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' https://i.ytimg.com; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

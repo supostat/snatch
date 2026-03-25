@@ -1,0 +1,63 @@
+import { useAppStore } from "../../stores/app-store";
+import { TabNav } from "./TabNav";
+
+export function MainLayout() {
+  const activeTab = useAppStore((state) => state.activeTab);
+
+  return (
+    <div className="flex h-full flex-col bg-hacker-bg">
+      <header className="flex h-8 items-center justify-between border-b border-hacker-border px-4">
+        <div
+          className="flex items-center gap-2 text-xs font-bold tracking-widest"
+          style={{ color: "var(--accent)" }}
+        >
+          SNATCH
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            className="flex h-5 w-5 items-center justify-center rounded text-hacker-text-dim hover:bg-hacker-surface hover:text-hacker-text"
+            aria-label="Minimize"
+          >
+            &#x2500;
+          </button>
+          <button
+            className="flex h-5 w-5 items-center justify-center rounded text-hacker-text-dim hover:bg-hacker-surface hover:text-hacker-text"
+            aria-label="Maximize"
+          >
+            &#x25A1;
+          </button>
+          <button
+            className="flex h-5 w-5 items-center justify-center rounded text-hacker-text-dim hover:bg-hacker-surface hover:text-hacker-red"
+            aria-label="Close"
+          >
+            &#x2715;
+          </button>
+        </div>
+      </header>
+
+      <TabNav />
+
+      <main className="flex-1 overflow-auto p-4">
+        <div className="text-hacker-text-dim">
+          {activeTab === "download" && <PlaceholderTab name="Download" />}
+          {activeTab === "queue" && <PlaceholderTab name="Queue" />}
+          {activeTab === "history" && <PlaceholderTab name="History" />}
+          {activeTab === "settings" && <PlaceholderTab name="Settings" />}
+          {activeTab === "about" && <PlaceholderTab name="About" />}
+        </div>
+      </main>
+
+      <footer className="flex h-6 items-center border-t border-hacker-border px-4 text-xs text-hacker-text-dim">
+        <span>SNATCH v1.0.0</span>
+      </footer>
+    </div>
+  );
+}
+
+function PlaceholderTab({ name }: { name: string }) {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <span style={{ color: "var(--accent-dim)" }}>[ {name} ]</span>
+    </div>
+  );
+}

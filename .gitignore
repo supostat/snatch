@@ -1,3 +1,22 @@
 .vault
 .claude
 .vscode
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files are committed
+# pnpm-lock.yaml

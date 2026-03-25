@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --color-hacker-bg: #0a0a0a;
+  --color-hacker-surface: #111111;
+  --color-hacker-border: #1a1a1a;
+  --color-hacker-text: #888888;
+  --color-hacker-text-dim: #555555;
+
+  --color-hacker-green: #00ff41;
+  --color-hacker-green-dim: #00b32d;
+  --color-hacker-green-glow: #00ff4180;
+
+  --color-hacker-amber: #ffb000;
+  --color-hacker-amber-dim: #b37b00;
+  --color-hacker-amber-glow: #ffb00080;
+
+  --color-hacker-cyan: #00e5ff;
+  --color-hacker-cyan-dim: #00a0b3;
+  --color-hacker-cyan-glow: #00e5ff80;
+
+  --color-hacker-red: #ff3333;
+  --color-hacker-red-dim: #b32424;
+}
+
+:root {
+  --accent: var(--color-hacker-green);
+  --accent-dim: var(--color-hacker-green-dim);
+  --accent-glow: var(--color-hacker-green-glow);
+}
+
+[data-theme="green"] {
+  --accent: var(--color-hacker-green);
+  --accent-dim: var(--color-hacker-green-dim);
+  --accent-glow: var(--color-hacker-green-glow);
+}
+
+[data-theme="amber"] {
+  --accent: var(--color-hacker-amber);
+  --accent-dim: var(--color-hacker-amber-dim);
+  --accent-glow: var(--color-hacker-amber-glow);
+}
+
+[data-theme="cyan"] {
+  --accent: var(--color-hacker-cyan);
+  --accent-dim: var(--color-hacker-cyan-dim);
+  --accent-glow: var(--color-hacker-cyan-glow);
+}
+
+@font-face {
+  font-family: "CRT";
+  src: local("Courier New"), local("Courier"), local("monospace");
+  font-display: swap;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-hacker-bg);
+  color: var(--color-hacker-text);
+  font-family: "CRT", "Courier New", Courier, monospace;
+  -webkit-font-smoothing: none;
+  overflow: hidden;
+  height: 100%;
+  user-select: none;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+::selection {
+  background-color: var(--accent);
+  color: var(--color-hacker-bg);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-hacker-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-dim);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
