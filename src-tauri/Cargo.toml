@@ -20,6 +20,9 @@ regex = "1"
 dirs = "6"
 tokio-util = "0.7"
 uuid = { version = "1", features = ["v4"] }
+arboard = "3"
+opener = { version = "0.7", features = ["reveal"] }
+tauri-plugin-dialog = "2"
 
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.29", features = ["signal"] }

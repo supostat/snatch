@@ -92,4 +92,16 @@ export interface HistoryEntry {
   thumbnail: string | null;
 }
 
+export type QueueItemStatus = "pending" | "fetching" | "downloading" | "done" | "error" | "cancelled";
+
+export interface QueueItem {
+  id: string;
+  url: string;
+  status: QueueItemStatus;
+  videoInfo: VideoInfo | null;
+  progress: DownloadProgress | null;
+  error: string | null;
+  quality: QualityPreset;
+}
+
 export type TabId = "download" | "queue" | "history" | "settings" | "about";

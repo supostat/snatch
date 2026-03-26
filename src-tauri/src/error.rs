@@ -24,6 +24,15 @@ pub enum AppError {
     #[error("History error: {0}")]
     History(String),
 
+    #[error("Clipboard error: {0}")]
+    Clipboard(String),
+
+    #[error("Dialog error: {0}")]
+    Dialog(String),
+
+    #[error("Window error: {0}")]
+    Window(String),
+
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 

@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::sync::{Mutex, RwLock};
 
 use models::download::DownloadHandle;
+use services::clipboard::ClipboardWatcher;
 use services::history::HistoryService;
 use services::settings::SettingsService;
 use services::ytdlp::{resolve_ytdlp_binary, YtdlpRunner};
@@ -27,15 +28,23 @@ pub fn run() {
         .map(|home| home.join(".snatch"))
         .unwrap_or_else(|| std::path::PathBuf::from(".snatch"));
 
+    let settings_service = SettingsService::load_or_recreate(&snatch_dir.join("settings.json"));
+    let auto_clipboard = settings_service.get_all().auto_clipboard;
+
     let app_state = AppState {
         ytdlp_runner: YtdlpRunner::new(binary_path),
         active_downloads: Mutex::new(HashMap::new()),
-        settings: RwLock::new(SettingsService::load_or_recreate(&snatch_dir.join("settings.json"))),
+        settings: RwLock::new(settings_service),
         history: RwLock::new(HistoryService::load_or_recreate(&snatch_dir.join("history.json"))),
     };
 
     if let Err(error) = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(app_state)
+        .setup(move |app| {
+            ClipboardWatcher::start(app.handle().clone(), auto_clipboard);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::download::yt_get_info,
             commands::download::yt_download,
@@ -47,6 +56,15 @@ pub fn run() {
             commands::history::history_add,
             commands::history::history_remove,
             commands::history::history_clear,
+            commands::dialog::select_folder,
+            commands::dialog::open_path,
+            commands::dialog::open_url,
+            commands::dialog::show_in_folder,
+            commands::window::window_minimize,
+            commands::window::window_maximize,
+            commands::window::window_close,
+            commands::window::get_downloads_path,
+            commands::window::get_app_version,
         ])
         .run(tauri::generate_context!())
     {

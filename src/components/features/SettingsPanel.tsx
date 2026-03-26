@@ -8,6 +8,7 @@ import type {
 } from "../../lib/types";
 import { HackerCard } from "../shared/HackerCard";
 import { HackerToggle } from "../shared/HackerToggle";
+import { FolderPicker } from "./FolderPicker";
 
 interface SettingsPanelProps {
   settings: Settings;
@@ -78,11 +79,10 @@ export function SettingsPanel({ settings, onUpdate }: SettingsPanelProps) {
         <SectionHeader title="Download" />
 
         <SettingRow label="Download directory">
-          <div className="flex items-center gap-2 max-w-xs">
-            <span className="text-[var(--accent)] font-mono text-xs truncate max-w-[200px]" title={settings.downloadDir}>
-              {settings.downloadDir}
-            </span>
-          </div>
+          <FolderPicker
+            currentPath={settings.downloadDir}
+            onSelect={(path) => onUpdate("downloadDir", path)}
+          />
         </SettingRow>
 
         <SettingRow label="Default quality">

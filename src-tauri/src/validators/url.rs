@@ -5,11 +5,15 @@ use crate::error::AppError;
 
 const MAX_URL_LENGTH: usize = 2048;
 
-static YOUTUBE_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+pub(crate) static YOUTUBE_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
         r"^https://(www\.)?(youtube\.com/(watch\?v=[\w\-]{11}|shorts/[\w\-]{11}|playlist\?list=[\w\-]+)|youtu\.be/[\w\-]{11})"
     ).expect("youtube URL regex is valid")
 });
+
+pub(crate) fn is_youtube_url(text: &str) -> bool {
+    YOUTUBE_URL_REGEX.is_match(text)
+}
 
 #[derive(Debug, Clone)]
 pub struct ValidatedUrl(String);
