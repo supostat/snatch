@@ -1,4 +1,5 @@
 import { DownloadPage } from "../../pages/DownloadPage";
+import { SettingsPage } from "../../pages/SettingsPage";
 import { useAppStore } from "../../stores/app-store";
 import { ErrorBoundary } from "../shared/ErrorBoundary";
 import { TabNav } from "./TabNav";
@@ -44,7 +45,7 @@ export function MainLayout() {
           {activeTab === "download" && <DownloadPage />}
           {activeTab === "queue" && <PlaceholderTab name="Queue" />}
           {activeTab === "history" && <PlaceholderTab name="History" />}
-          {activeTab === "settings" && <PlaceholderTab name="Settings" />}
+          {activeTab === "settings" && <SettingsPage />}
           {activeTab === "about" && <PlaceholderTab name="About" />}
         </ErrorBoundary>
       </main>
