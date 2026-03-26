@@ -1,10 +1,16 @@
 use serde::{Deserialize, Serialize};
+use tokio_util::sync::CancellationToken;
 
 use super::quality::{CookiesBrowser, DownloadStage, QualityPreset};
+
+pub struct DownloadHandle {
+    pub cancel_token: CancellationToken,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DownloadOptions {
+    pub download_id: String,
     pub url: String,
     pub quality: QualityPreset,
     pub output_dir: String,
@@ -43,6 +49,7 @@ mod tests {
     #[test]
     fn download_options_camelcase_roundtrip() {
         let options = DownloadOptions {
+            download_id: "test-id".to_string(),
             url: "https://www.youtube.com/watch?v=test".to_string(),
             quality: QualityPreset::Q1080,
             output_dir: "/tmp/downloads".to_string(),
@@ -52,6 +59,7 @@ mod tests {
         };
 
         let json = serde_json::to_string(&options).expect("serialize");
+        assert!(json.contains("\"downloadId\""));
         assert!(json.contains("\"outputDir\""));
         assert!(json.contains("\"embedThumbnail\""));
         assert!(json.contains("\"embedMetadata\""));

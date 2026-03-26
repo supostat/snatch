@@ -1,4 +1,6 @@
+import { DownloadPage } from "../../pages/DownloadPage";
 import { useAppStore } from "../../stores/app-store";
+import { ErrorBoundary } from "../shared/ErrorBoundary";
 import { TabNav } from "./TabNav";
 
 export function MainLayout() {
@@ -37,14 +39,14 @@ export function MainLayout() {
 
       <TabNav />
 
-      <main className="flex-1 overflow-auto p-4">
-        <div className="text-hacker-text-dim">
-          {activeTab === "download" && <PlaceholderTab name="Download" />}
+      <main className="flex-1 overflow-hidden">
+        <ErrorBoundary>
+          {activeTab === "download" && <DownloadPage />}
           {activeTab === "queue" && <PlaceholderTab name="Queue" />}
           {activeTab === "history" && <PlaceholderTab name="History" />}
           {activeTab === "settings" && <PlaceholderTab name="Settings" />}
           {activeTab === "about" && <PlaceholderTab name="About" />}
-        </div>
+        </ErrorBoundary>
       </main>
 
       <footer className="flex h-6 items-center border-t border-hacker-border px-4 text-xs text-hacker-text-dim">

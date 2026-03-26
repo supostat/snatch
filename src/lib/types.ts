@@ -37,6 +37,7 @@ export interface VideoInfo {
 }
 
 export interface DownloadOptions {
+  downloadId: string;
   url: string;
   quality: QualityPreset;
   outputDir: string;
