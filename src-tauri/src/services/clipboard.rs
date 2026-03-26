@@ -23,7 +23,7 @@ impl ClipboardWatcher {
         }
 
         let token = cancel_token.clone();
-        tokio::spawn(async move {
+        tauri::async_runtime::spawn(async move {
             let mut watcher = Self {
                 seen_urls: HashSet::new(),
                 cancel_token: token.clone(),

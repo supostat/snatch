@@ -60,8 +60,6 @@ export const api = {
   window: {
     minimize: () => invoke<void>("window_minimize"),
 
-    maximize: () => invoke<void>("window_maximize"),
-
     close: () => invoke<void>("window_close"),
   },
 

@@ -10,25 +10,6 @@ pub async fn window_minimize(window: tauri::Window) -> Result<(), AppError> {
 }
 
 #[tauri::command]
-pub async fn window_maximize(window: tauri::Window) -> Result<(), AppError> {
-    let is_maximized = window
-        .is_maximized()
-        .map_err(|e| AppError::Window(format!("check maximized failed: {e}")))?;
-
-    if is_maximized {
-        window
-            .unmaximize()
-            .map_err(|e| AppError::Window(format!("unmaximize failed: {e}")))?;
-    } else {
-        window
-            .maximize()
-            .map_err(|e| AppError::Window(format!("maximize failed: {e}")))?;
-    }
-
-    Ok(())
-}
-
-#[tauri::command]
 pub async fn window_close(window: tauri::Window) -> Result<(), AppError> {
     window
         .close()

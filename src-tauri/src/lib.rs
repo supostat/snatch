@@ -61,7 +61,6 @@ pub fn run() {
             commands::dialog::open_url,
             commands::dialog::show_in_folder,
             commands::window::window_minimize,
-            commands::window::window_maximize,
             commands::window::window_close,
             commands::window::get_downloads_path,
             commands::window::get_app_version,

@@ -7,11 +7,11 @@ export function TitleBar() {
       data-tauri-drag-region
     >
       <div
-        className="flex items-center gap-2 text-xs font-bold tracking-widest"
+        className="flex items-center gap-2 text-xs font-bold tracking-widest cursor-default select-none"
         style={{ color: "var(--accent)" }}
         data-tauri-drag-region
       >
-        SNATCH
+        <span className="opacity-70">{">_"}</span> SNATCH
       </div>
       <div className="flex items-center gap-1">
         <button
@@ -21,14 +21,7 @@ export function TitleBar() {
         >
           &#x2500;
         </button>
-        <button
-          onClick={() => void api.window.maximize()}
-          className="flex h-5 w-5 items-center justify-center rounded text-hacker-text-dim hover:bg-hacker-surface hover:text-hacker-text"
-          aria-label="Maximize"
-        >
-          &#x25A1;
-        </button>
-        <button
+<button
           onClick={() => void api.window.close()}
           className="flex h-5 w-5 items-center justify-center rounded text-hacker-text-dim hover:bg-hacker-surface hover:text-hacker-red"
           aria-label="Close"
