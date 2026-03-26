@@ -7,6 +7,7 @@ import type {
   Theme,
 } from "../../lib/types";
 import { HackerCard } from "../shared/HackerCard";
+import { HackerSelect } from "../shared/HackerSelect";
 import { HackerToggle } from "../shared/HackerToggle";
 import { FolderPicker } from "./FolderPicker";
 
@@ -29,32 +30,6 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
       <span className="text-hacker-text font-mono text-xs">{label}</span>
       {children}
     </div>
-  );
-}
-
-function HackerSelect({
-  value,
-  options,
-  onChange,
-}: {
-  value: string;
-  options: readonly { value: string; label: string }[];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="bg-hacker-bg border border-hacker-border text-[var(--accent)] font-mono text-xs
-        px-2 py-1 outline-none cursor-pointer
-        focus:border-[var(--accent)] transition-all duration-200"
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
   );
 }
 
