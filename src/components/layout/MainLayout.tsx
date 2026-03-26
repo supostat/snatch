@@ -1,4 +1,5 @@
 import { DownloadPage } from "../../pages/DownloadPage";
+import { HistoryPage } from "../../pages/HistoryPage";
 import { SettingsPage } from "../../pages/SettingsPage";
 import { useAppStore } from "../../stores/app-store";
 import { ErrorBoundary } from "../shared/ErrorBoundary";
@@ -44,7 +45,7 @@ export function MainLayout() {
         <ErrorBoundary>
           {activeTab === "download" && <DownloadPage />}
           {activeTab === "queue" && <PlaceholderTab name="Queue" />}
-          {activeTab === "history" && <PlaceholderTab name="History" />}
+          {activeTab === "history" && <HistoryPage />}
           {activeTab === "settings" && <SettingsPage />}
           {activeTab === "about" && <PlaceholderTab name="About" />}
         </ErrorBoundary>

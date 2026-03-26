@@ -4,6 +4,7 @@ import type {
   CookiesBrowser,
   DownloadProgress,
   DownloadResult,
+  HistoryEntry,
   QualityPreset,
   VideoInfo,
 } from "../lib/types";
@@ -34,6 +35,7 @@ export function useDownload(): UseDownloadReturn {
   const [downloadId, setDownloadId] = useState<string | null>(null);
 
   const downloadIdRef = useRef<string | null>(null);
+  const videoInfoRef = useRef<VideoInfo | null>(null);
   const settings = useAppStore((state) => state.settings);
   const setDownloadActive = useAppStore((state) => state.setDownloadActive);
 
@@ -65,6 +67,7 @@ export function useDownload(): UseDownloadReturn {
           settings?.cookiesBrowser ?? "none";
         const info = await api.yt.getInfo(url, cookiesBrowser);
         setVideoInfo(info);
+        videoInfoRef.current = info;
         return { info, error: null };
       } catch (fetchError) {
         const errorMessage = String(fetchError);
@@ -102,6 +105,23 @@ export function useDownload(): UseDownloadReturn {
 
         setResult(downloadResult);
 
+        if (downloadResult.success && videoInfoRef.current) {
+          const videoInfo = videoInfoRef.current;
+          const historyEntry: HistoryEntry = {
+            id: newDownloadId,
+            title: videoInfo.title,
+            url,
+            filePath: downloadResult.filePath ?? "",
+            quality,
+            fileSize: downloadResult.fileSize,
+            duration: videoInfo.duration,
+            channel: videoInfo.channel,
+            downloadedAt: new Date().toISOString(),
+            thumbnail: videoInfo.thumbnail,
+          };
+          api.history.add(historyEntry).catch(() => {});
+        }
+
         if (!downloadResult.success && downloadResult.error) {
           setError(downloadResult.error);
         }
@@ -128,6 +148,7 @@ export function useDownload(): UseDownloadReturn {
 
   const reset = useCallback(() => {
     setVideoInfo(null);
+    videoInfoRef.current = null;
     setProgress(null);
     setResult(null);
     setError(null);
