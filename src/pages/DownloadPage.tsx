@@ -7,6 +7,7 @@ import { RetroProgress } from "../components/shared/RetroProgress";
 import { TermLog } from "../components/shared/TermLog";
 import { useClipboard } from "../hooks/useClipboard";
 import { useDownload } from "../hooks/useDownload";
+import { useI18n } from "../hooks/useI18n";
 import { useTermLog } from "../hooks/useTermLog";
 import type { QualityPreset } from "../lib/types";
 
@@ -16,6 +17,7 @@ export function DownloadPage() {
   const [quality, setQuality] = useState<QualityPreset>("best");
   const { lines, addLine, clear: clearLog } = useTermLog();
   const download = useDownload();
+  const { t } = useI18n();
 
   const handleClipboardUrl = useCallback((newUrl: string) => {
     setClipboardUrl(newUrl);
@@ -26,21 +28,21 @@ export function DownloadPage() {
   async function handleFetch(inputUrl: string) {
     setUrl(inputUrl);
     clearLog();
-    addLine(`Fetching info for: ${inputUrl}`);
+    addLine(`${t("download.fetchingInfo")}${inputUrl}`);
     const result = await download.fetchInfo(inputUrl);
     if (result.error) {
-      addLine(`Error: ${result.error}`);
+      addLine(`${t("download.errorPrefix")}${result.error}`);
     }
   }
 
   async function handleStartDownload() {
     if (!url) return;
-    addLine(`Starting download: ${quality}`);
+    addLine(`${t("download.startingDownload")}${quality}`);
     await download.startDownload(url, quality);
   }
 
   async function handleCancel() {
-    addLine("Cancelling download...");
+    addLine(t("download.cancellingDownload"));
     await download.cancel();
   }
 
@@ -56,7 +58,7 @@ export function DownloadPage() {
 
       {download.error && !download.isLoadingInfo && (
         <div className="border border-hacker-red bg-hacker-surface p-3 font-mono text-xs text-hacker-red">
-          {">"} ERROR: {download.error}
+          {">"} {t("download.downloadError")}{download.error}
         </div>
       )}
 
@@ -89,7 +91,7 @@ export function DownloadPage() {
 
       {download.result?.success && (
         <div className="border border-[var(--accent)] bg-hacker-surface p-3 font-mono text-xs text-[var(--accent)]">
-          {">"} Download complete: {download.result.filePath}
+          {">"} {t("download.downloadComplete")}{download.result.filePath}
         </div>
       )}
 

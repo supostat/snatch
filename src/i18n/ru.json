@@ -1,0 +1,107 @@
+{
+  "tabs": {
+    "download": "Загрузка",
+    "queue": "Очередь",
+    "history": "История",
+    "settings": "Настройки",
+    "about": "О программе"
+  },
+  "quality": {
+    "best": "Лучшее качество",
+    "q2160": "4K (2160p)",
+    "q1080": "Full HD (1080p)",
+    "q720": "HD (720p)",
+    "q480": "SD (480p)",
+    "audio": "Только аудио (MP3)"
+  },
+  "themes": {
+    "green": "Матрица",
+    "amber": "Ретро",
+    "cyan": "Кибер"
+  },
+  "download": {
+    "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+    "fetch": "НАЙТИ",
+    "startDownload": "СКАЧАТЬ",
+    "cancel": "ОТМЕНА",
+    "qualityLabel": "Качество:",
+    "fetchingInfo": "Поиск информации: ",
+    "errorPrefix": "Ошибка: ",
+    "startingDownload": "Начало загрузки: ",
+    "cancellingDownload": "Отмена загрузки...",
+    "downloadError": "ОШИБКА: ",
+    "downloadComplete": "Загрузка завершена: "
+  },
+  "queue": {
+    "urlsPlaceholder": "Вставьте ссылки, по одной на строку...",
+    "addToQueue": "В очередь",
+    "clear": "Очистить",
+    "cancel": "Отмена",
+    "retry": "Повтор",
+    "remove": "Удалить",
+    "emptyState": "[ Очередь пуста ]",
+    "total": "ВСЕГО: ",
+    "active": "АКТИВНО: ",
+    "pending": "ОЖИДАНИЕ: ",
+    "done": "ГОТОВО: ",
+    "errors": "ОШИБКИ: "
+  },
+  "history": {
+    "searchPlaceholder": "Поиск в истории...",
+    "clearAll": "ОЧИСТИТЬ",
+    "emptyState": "[ Нет записей ]",
+    "delete": "УД."
+  },
+  "settings": {
+    "loadingSettings": "Загрузка настроек...",
+    "sectionDownload": "Загрузка",
+    "sectionAppearance": "Оформление",
+    "sectionAdvanced": "Дополнительно",
+    "downloadDirectory": "Папка загрузок",
+    "defaultQuality": "Качество по умолчанию",
+    "embedThumbnail": "Встраивать обложку",
+    "embedMetadata": "Встраивать метаданные",
+    "theme": "Тема",
+    "matrixRainEffect": "Эффект матричного дождя",
+    "crtScanlineEffect": "Эффект CRT развёртки",
+    "maxConcurrentDownloads": "Макс. параллельных загрузок",
+    "autoPasteClipboard": "Автовставка из буфера обмена",
+    "language": "Язык",
+    "browserCookies": "Cookies браузера",
+    "cookiesWarning": "Даёт yt-dlp доступ к cookies браузера, включая данные авторизации других сайтов.",
+    "browse": "ОБЗОР"
+  },
+  "cookies": {
+    "none": "Нет",
+    "chrome": "Chrome",
+    "firefox": "Firefox",
+    "safari": "Safari",
+    "edge": "Edge",
+    "brave": "Brave"
+  },
+  "locales": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "progress": {
+    "downloading": "ЗАГРУЗКА",
+    "merging": "СКЛЕЙКА",
+    "converting": "КОНВЕРТАЦИЯ",
+    "done": "ГОТОВО",
+    "error": "ОШИБКА",
+    "eta": "ОСТ. "
+  },
+  "common": {
+    "waitingForOutput": "Ожидание вывода...",
+    "downloading": "загрузка"
+  },
+  "about": {
+    "version": "Версия",
+    "engine": "Движок",
+    "platform": "Платформа",
+    "builtWith": "Создано с",
+    "links": "Ссылки",
+    "sourceCode": "Исходный код",
+    "ytdlpProject": "Проект yt-dlp"
+  }
+}

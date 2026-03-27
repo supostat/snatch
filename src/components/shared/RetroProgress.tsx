@@ -1,3 +1,4 @@
+import { useI18n } from "../../hooks/useI18n";
 import type { DownloadStage } from "../../lib/types";
 
 interface RetroProgressProps {
@@ -9,12 +10,12 @@ interface RetroProgressProps {
 
 const TOTAL_BLOCKS = 30;
 
-const STAGE_LABELS: Record<DownloadStage, string> = {
-  downloading: "DOWNLOADING",
-  merging: "MERGING",
-  converting: "CONVERTING",
-  done: "DONE",
-  error: "ERROR",
+const STAGE_KEYS: Record<DownloadStage, string> = {
+  downloading: "progress.downloading",
+  merging: "progress.merging",
+  converting: "progress.converting",
+  done: "progress.done",
+  error: "progress.error",
 };
 
 export function RetroProgress({
@@ -23,6 +24,7 @@ export function RetroProgress({
   eta,
   stage,
 }: RetroProgressProps) {
+  const { t } = useI18n();
   const clampedPercent = Math.min(100, Math.max(0, percent));
   const filled = Math.round((clampedPercent / 100) * TOTAL_BLOCKS);
   const empty = TOTAL_BLOCKS - filled;
@@ -39,9 +41,9 @@ export function RetroProgress({
         <span className="text-[var(--accent)] font-bold">{percentStr}%</span>
       </div>
       <div className="flex gap-4 text-xs text-hacker-text-dim">
-        <span>{STAGE_LABELS[stage]}</span>
+        <span>{t(STAGE_KEYS[stage])}</span>
         {speed && <span>{speed}</span>}
-        {eta && <span>ETA {eta}</span>}
+        {eta && <span>{t("progress.eta")}{eta}</span>}
       </div>
     </div>
   );

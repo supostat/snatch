@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { MAX_URL_LENGTH } from "../../lib/constants";
+import { useI18n } from "../../hooks/useI18n";
 import { HackerButton } from "../shared/HackerButton";
 import { HackerInput } from "../shared/HackerInput";
 
@@ -12,6 +13,7 @@ interface UrlInputProps {
 
 export function UrlInput({ onFetch, isLoading, disabled = false, externalUrl }: UrlInputProps) {
   const [url, setUrl] = useState("");
+  const { t } = useI18n();
 
   useEffect(() => {
     if (externalUrl) {
@@ -40,7 +42,7 @@ export function UrlInput({ onFetch, isLoading, disabled = false, externalUrl }: 
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="https://www.youtube.com/watch?v=..."
+          placeholder={t("download.urlPlaceholder")}
           disabled={disabled}
           autoFocus
         />
@@ -50,7 +52,7 @@ export function UrlInput({ onFetch, isLoading, disabled = false, externalUrl }: 
         disabled={!isValid || disabled}
         loading={isLoading}
       >
-        FETCH
+        {t("download.fetch")}
       </HackerButton>
     </div>
   );

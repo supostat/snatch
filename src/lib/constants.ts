@@ -1,27 +1,34 @@
+import { t } from "../i18n";
 import type { QualityPreset, TabId, Theme } from "./types";
 
-export const QUALITY_PRESETS: readonly { value: QualityPreset; label: string }[] = [
-  { value: "best", label: "Best Quality" },
-  { value: "q2160", label: "4K (2160p)" },
-  { value: "q1080", label: "Full HD (1080p)" },
-  { value: "q720", label: "HD (720p)" },
-  { value: "q480", label: "SD (480p)" },
-  { value: "audio", label: "Audio Only (MP3)" },
-] as const;
+export function getQualityPresets(): readonly { value: QualityPreset; label: string }[] {
+  return [
+    { value: "best", label: t("quality.best") },
+    { value: "q2160", label: t("quality.q2160") },
+    { value: "q1080", label: t("quality.q1080") },
+    { value: "q720", label: t("quality.q720") },
+    { value: "q480", label: t("quality.q480") },
+    { value: "audio", label: t("quality.audio") },
+  ];
+}
 
-export const TABS: readonly { id: TabId; label: string }[] = [
-  { id: "download", label: "Download" },
-  { id: "queue", label: "Queue" },
-  { id: "history", label: "History" },
-  { id: "settings", label: "Settings" },
-  { id: "about", label: "About" },
-] as const;
+export function getTabs(): readonly { id: TabId; label: string }[] {
+  return [
+    { id: "download", label: t("tabs.download") },
+    { id: "queue", label: t("tabs.queue") },
+    { id: "history", label: t("tabs.history") },
+    { id: "settings", label: t("tabs.settings") },
+    { id: "about", label: t("tabs.about") },
+  ];
+}
 
-export const THEMES: readonly { value: Theme; label: string; cssClass: string }[] = [
-  { value: "green", label: "Matrix Green", cssClass: "theme-green" },
-  { value: "amber", label: "Retro Amber", cssClass: "theme-amber" },
-  { value: "cyan", label: "Cyber Cyan", cssClass: "theme-cyan" },
-] as const;
+export function getThemes(): readonly { value: Theme; label: string }[] {
+  return [
+    { value: "green", label: t("themes.green") },
+    { value: "amber", label: t("themes.amber") },
+    { value: "cyan", label: t("themes.cyan") },
+  ];
+}
 
 export const MAX_CONCURRENT_DOWNLOADS = 5;
 export const MIN_CONCURRENT_DOWNLOADS = 1;

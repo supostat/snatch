@@ -1,3 +1,4 @@
+import { useI18n } from "../../hooks/useI18n";
 import { HackerButton } from "../shared/HackerButton";
 
 interface DownloadButtonProps {
@@ -13,17 +14,19 @@ export function DownloadButton({
   onCancel,
   disabled = false,
 }: DownloadButtonProps) {
+  const { t } = useI18n();
+
   if (isDownloading) {
     return (
       <HackerButton variant="danger" onClick={onCancel}>
-        CANCEL
+        {t("download.cancel")}
       </HackerButton>
     );
   }
 
   return (
     <HackerButton onClick={onStart} disabled={disabled}>
-      START DOWNLOAD
+      {t("download.startDownload")}
     </HackerButton>
   );
 }

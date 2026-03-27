@@ -1,3 +1,4 @@
+import { useI18n } from "../../hooks/useI18n";
 import type { QueueItem, QueueItemStatus } from "../../lib/types";
 import { HackerButton } from "../shared/HackerButton";
 import { RetroProgress } from "../shared/RetroProgress";
@@ -42,6 +43,7 @@ function QueueItemRow({
   onRetry: (id: string) => void;
   onRemove: (id: string) => void;
 }) {
+  const { t } = useI18n();
   const title = item.videoInfo?.title ?? item.url;
   const showProgress = item.status === "downloading" && item.progress;
 
@@ -59,17 +61,17 @@ function QueueItemRow({
         <div className="flex items-center gap-1 shrink-0">
           {isActive(item.status) && (
             <HackerButton variant="danger" onClick={() => onCancel(item.id)}>
-              Cancel
+              {t("queue.cancel")}
             </HackerButton>
           )}
           {item.status === "error" && (
             <HackerButton variant="ghost" onClick={() => onRetry(item.id)}>
-              Retry
+              {t("queue.retry")}
             </HackerButton>
           )}
           {!isActive(item.status) && (
             <HackerButton variant="ghost" onClick={() => onRemove(item.id)}>
-              Remove
+              {t("queue.remove")}
             </HackerButton>
           )}
         </div>
@@ -94,10 +96,12 @@ function QueueItemRow({
 }
 
 export function BatchQueue({ items, onCancel, onRetry, onRemove }: BatchQueueProps) {
+  const { t } = useI18n();
+
   if (items.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
-        <span className="font-mono text-xs text-hacker-text-dim">[ Queue empty ]</span>
+        <span className="font-mono text-xs text-hacker-text-dim">{t("queue.emptyState")}</span>
       </div>
     );
   }

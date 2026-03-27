@@ -1,3 +1,4 @@
+import { useI18n } from "../../hooks/useI18n";
 import type { HistoryEntry } from "../../lib/types";
 import { HackerButton } from "../shared/HackerButton";
 
@@ -20,7 +21,7 @@ function formatDate(iso: string): string {
 }
 
 function formatFileSize(bytes: number | null): string {
-  if (bytes === null) return "—";
+  if (bytes === null) return "\u2014";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -28,11 +29,13 @@ function formatFileSize(bytes: number | null): string {
 }
 
 export function HistoryTable({ entries, onRemove }: HistoryTableProps) {
+  const { t } = useI18n();
+
   if (entries.length === 0) {
     return (
       <div className="flex h-40 items-center justify-center">
         <span className="text-hacker-text-dim font-mono text-sm">
-          [ No entries ]
+          {t("history.emptyState")}
         </span>
       </div>
     );
@@ -67,7 +70,7 @@ export function HistoryTable({ entries, onRemove }: HistoryTableProps) {
             variant="ghost"
             onClick={() => onRemove(entry.id)}
           >
-            DEL
+            {t("history.delete")}
           </HackerButton>
         </div>
       ))}

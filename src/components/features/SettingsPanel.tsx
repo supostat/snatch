@@ -1,4 +1,5 @@
-import { QUALITY_PRESETS, THEMES } from "../../lib/constants";
+import { getQualityPresets, getThemes } from "../../lib/constants";
+import { useI18n } from "../../hooks/useI18n";
 import type {
   CookiesBrowser,
   Locale,
@@ -33,92 +34,96 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-const COOKIES_OPTIONS = [
-  { value: "none", label: "None" },
-  { value: "chrome", label: "Chrome" },
-  { value: "firefox", label: "Firefox" },
-  { value: "safari", label: "Safari" },
-  { value: "edge", label: "Edge" },
-  { value: "brave", label: "Brave" },
-] as const;
+const COOKIES_BROWSERS = ["none", "chrome", "firefox", "safari", "edge", "brave"] as const;
 
-const LOCALE_OPTIONS = [
-  { value: "en", label: "English" },
-  { value: "ru", label: "Русский" },
-] as const;
+const LOCALES = ["en", "ru"] as const;
 
 export function SettingsPanel({ settings, onUpdate }: SettingsPanelProps) {
+  const { t } = useI18n();
+
+  const cookiesOptions = COOKIES_BROWSERS.map((browser) => ({
+    value: browser,
+    label: t(`cookies.${browser}`),
+  }));
+
+  const localeOptions = LOCALES.map((locale) => ({
+    value: locale,
+    label: t(`locales.${locale}`),
+  }));
+
+  const themes = getThemes();
+
   return (
     <div className="space-y-4">
       <HackerCard>
-        <SectionHeader title="Download" />
+        <SectionHeader title={t("settings.sectionDownload")} />
 
-        <SettingRow label="Download directory">
+        <SettingRow label={t("settings.downloadDirectory")}>
           <FolderPicker
             currentPath={settings.downloadDir}
             onSelect={(path) => onUpdate("downloadDir", path)}
           />
         </SettingRow>
 
-        <SettingRow label="Default quality">
+        <SettingRow label={t("settings.defaultQuality")}>
           <HackerSelect
             value={settings.defaultQuality}
-            options={QUALITY_PRESETS}
+            options={getQualityPresets()}
             onChange={(v) => onUpdate("defaultQuality", v as QualityPreset)}
           />
         </SettingRow>
 
         <HackerToggle
-          label="Embed thumbnail"
+          label={t("settings.embedThumbnail")}
           checked={settings.embedThumbnail}
           onChange={(v) => onUpdate("embedThumbnail", v)}
         />
 
         <HackerToggle
-          label="Embed metadata"
+          label={t("settings.embedMetadata")}
           checked={settings.embedMetadata}
           onChange={(v) => onUpdate("embedMetadata", v)}
         />
       </HackerCard>
 
       <HackerCard>
-        <SectionHeader title="Appearance" />
+        <SectionHeader title={t("settings.sectionAppearance")} />
 
-        <SettingRow label="Theme">
+        <SettingRow label={t("settings.theme")}>
           <div className="flex gap-2">
-            {THEMES.map((t) => (
+            {themes.map((themeOption) => (
               <button
-                key={t.value}
-                onClick={() => onUpdate("theme", t.value as Theme)}
+                key={themeOption.value}
+                onClick={() => onUpdate("theme", themeOption.value as Theme)}
                 className={`px-3 py-1 font-mono text-xs border transition-all duration-200 cursor-pointer
-                  ${settings.theme === t.value
+                  ${settings.theme === themeOption.value
                     ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10"
                     : "border-hacker-border text-hacker-text-dim hover:border-hacker-text"
                   }`}
               >
-                {t.label}
+                {themeOption.label}
               </button>
             ))}
           </div>
         </SettingRow>
 
         <HackerToggle
-          label="Matrix rain effect"
+          label={t("settings.matrixRainEffect")}
           checked={settings.showMatrixRain}
           onChange={(v) => onUpdate("showMatrixRain", v)}
         />
 
         <HackerToggle
-          label="CRT scanline effect"
+          label={t("settings.crtScanlineEffect")}
           checked={settings.crtEffect}
           onChange={(v) => onUpdate("crtEffect", v)}
         />
       </HackerCard>
 
       <HackerCard>
-        <SectionHeader title="Advanced" />
+        <SectionHeader title={t("settings.sectionAdvanced")} />
 
-        <SettingRow label="Max concurrent downloads">
+        <SettingRow label={t("settings.maxConcurrentDownloads")}>
           <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
@@ -137,30 +142,30 @@ export function SettingsPanel({ settings, onUpdate }: SettingsPanelProps) {
         </SettingRow>
 
         <HackerToggle
-          label="Auto-paste from clipboard"
+          label={t("settings.autoPasteClipboard")}
           checked={settings.autoClipboard}
           onChange={(v) => onUpdate("autoClipboard", v)}
         />
 
-        <SettingRow label="Language">
+        <SettingRow label={t("settings.language")}>
           <HackerSelect
             value={settings.locale}
-            options={LOCALE_OPTIONS}
+            options={localeOptions}
             onChange={(v) => onUpdate("locale", v as Locale)}
           />
         </SettingRow>
 
-        <SettingRow label="Browser cookies">
+        <SettingRow label={t("settings.browserCookies")}>
           <HackerSelect
             value={settings.cookiesBrowser}
-            options={COOKIES_OPTIONS}
+            options={cookiesOptions}
             onChange={(v) => onUpdate("cookiesBrowser", v as CookiesBrowser)}
           />
         </SettingRow>
 
         {settings.cookiesBrowser !== "none" && (
           <div className="border border-hacker-amber/50 bg-hacker-amber/5 p-2 mt-2 font-mono text-xs text-hacker-amber">
-            {"⚠"} Gives yt-dlp access to your browser cookies, including auth data from other sites.
+            {"⚠"} {t("settings.cookiesWarning")}
           </div>
         )}
       </HackerCard>

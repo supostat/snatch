@@ -1,14 +1,15 @@
 import { useAppStore } from "../../stores/app-store";
-import { TABS } from "../../lib/constants";
+import { getTabs } from "../../lib/constants";
 import type { TabId } from "../../lib/types";
 
 export function TabNav() {
   const activeTab = useAppStore((state) => state.activeTab);
   const setActiveTab = useAppStore((state) => state.setActiveTab);
+  const tabs = getTabs();
 
   return (
     <nav className="flex border-b border-hacker-border">
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <TabButton
           key={tab.id}
           tabId={tab.id}

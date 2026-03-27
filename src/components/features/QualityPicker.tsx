@@ -1,4 +1,5 @@
-import { QUALITY_PRESETS } from "../../lib/constants";
+import { getQualityPresets } from "../../lib/constants";
+import { useI18n } from "../../hooks/useI18n";
 import type { QualityPreset } from "../../lib/types";
 import { HackerSelect } from "../shared/HackerSelect";
 
@@ -13,14 +14,16 @@ export function QualityPicker({
   onChange,
   disabled = false,
 }: QualityPickerProps) {
+  const { t } = useI18n();
+
   return (
     <div className="flex items-center gap-3">
       <label className="text-hacker-text-dim font-mono text-xs uppercase tracking-widest shrink-0">
-        Quality:
+        {t("download.qualityLabel")}
       </label>
       <HackerSelect
         value={value}
-        options={QUALITY_PRESETS}
+        options={getQualityPresets()}
         onChange={(v) => onChange(v as QualityPreset)}
         disabled={disabled}
       />

@@ -70,19 +70,13 @@
   --ring: var(--color-hacker-cyan);
 }
 
-@font-face {
-  font-family: "CRT";
-  src: local("Courier New"), local("Courier"), local("monospace");
-  font-display: swap;
-}
-
 html,
 body {
   margin: 0;
   padding: 0;
   background-color: var(--color-hacker-bg);
   color: var(--color-hacker-text);
-  font-family: "CRT", "Courier New", Courier, monospace;
+  font-family: "JetBrains Mono", "Courier New", Courier, monospace;
   -webkit-font-smoothing: none;
   overflow: hidden;
   height: 100%;

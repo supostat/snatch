@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BatchQueue } from "../components/features/BatchQueue";
 import { QualityPicker } from "../components/features/QualityPicker";
 import { HackerButton } from "../components/shared/HackerButton";
+import { useI18n } from "../hooks/useI18n";
 import { useQueue } from "../hooks/useQueue";
 import type { QualityPreset, QueueItemStatus } from "../lib/types";
 
@@ -18,23 +19,25 @@ function QueueStats({
   done: number;
   errors: number;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="flex gap-4 font-mono text-xs">
       <span className="text-hacker-text-dim">
-        TOTAL: <span className="text-hacker-text">{total}</span>
+        {t("queue.total")}<span className="text-hacker-text">{total}</span>
       </span>
       <span className="text-hacker-text-dim">
-        ACTIVE: <span className="text-[var(--accent)]">{downloading}</span>
+        {t("queue.active")}<span className="text-[var(--accent)]">{downloading}</span>
       </span>
       <span className="text-hacker-text-dim">
-        PENDING: <span className="text-hacker-text">{pending}</span>
+        {t("queue.pending")}<span className="text-hacker-text">{pending}</span>
       </span>
       <span className="text-hacker-text-dim">
-        DONE: <span className="text-[var(--accent)]">{done}</span>
+        {t("queue.done")}<span className="text-[var(--accent)]">{done}</span>
       </span>
       {errors > 0 && (
         <span className="text-hacker-text-dim">
-          ERRORS: <span className="text-hacker-red">{errors}</span>
+          {t("queue.errors")}<span className="text-hacker-red">{errors}</span>
         </span>
       )}
     </div>
@@ -49,6 +52,7 @@ export function QueuePage() {
   const [urlText, setUrlText] = useState("");
   const [quality, setQuality] = useState<QualityPreset>("best");
   const queue = useQueue();
+  const { t } = useI18n();
 
   function handleAddToQueue() {
     const urls = urlText.split("\n");
@@ -68,7 +72,7 @@ export function QueuePage() {
         <textarea
           value={urlText}
           onChange={(event) => setUrlText(event.target.value)}
-          placeholder="Paste URLs here, one per line..."
+          placeholder={t("queue.urlsPlaceholder")}
           rows={4}
           className="w-full resize-none bg-hacker-bg border border-hacker-border p-3
             font-mono text-sm text-[var(--accent)] placeholder:text-hacker-text-dim
@@ -81,11 +85,11 @@ export function QueuePage() {
             onClick={handleAddToQueue}
             disabled={urlText.trim().length === 0}
           >
-            Add to Queue
+            {t("queue.addToQueue")}
           </HackerButton>
           {total > 0 && (
             <HackerButton variant="danger" onClick={queue.clearQueue}>
-              Clear
+              {t("queue.clear")}
             </HackerButton>
           )}
         </div>

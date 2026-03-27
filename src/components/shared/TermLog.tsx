@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useI18n } from "../../hooks/useI18n";
 
 interface TermLogProps {
   lines: string[];
@@ -7,6 +8,7 @@ interface TermLogProps {
 
 export function TermLog({ lines, maxHeight = "200px" }: TermLogProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -23,7 +25,7 @@ export function TermLog({ lines, maxHeight = "200px" }: TermLogProps) {
     >
       {lines.length === 0 ? (
         <span className="text-hacker-text-dim opacity-50">
-          {">"} Waiting for output...
+          {">"} {t("common.waitingForOutput")}
         </span>
       ) : (
         lines.map((line, index) => (

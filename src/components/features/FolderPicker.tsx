@@ -1,4 +1,5 @@
 import { api } from "../../lib/bindings";
+import { useI18n } from "../../hooks/useI18n";
 import { HackerButton } from "../shared/HackerButton";
 
 interface FolderPickerProps {
@@ -7,6 +8,8 @@ interface FolderPickerProps {
 }
 
 export function FolderPicker({ currentPath, onSelect }: FolderPickerProps) {
+  const { t } = useI18n();
+
   async function handleBrowse() {
     const selected = await api.dialog.selectFolder();
     if (selected) {
@@ -23,7 +26,7 @@ export function FolderPicker({ currentPath, onSelect }: FolderPickerProps) {
         {currentPath}
       </span>
       <HackerButton variant="ghost" onClick={() => void handleBrowse()}>
-        BROWSE
+        {t("settings.browse")}
       </HackerButton>
     </div>
   );

@@ -1,0 +1,107 @@
+{
+  "tabs": {
+    "download": "Download",
+    "queue": "Queue",
+    "history": "History",
+    "settings": "Settings",
+    "about": "About"
+  },
+  "quality": {
+    "best": "Best Quality",
+    "q2160": "4K (2160p)",
+    "q1080": "Full HD (1080p)",
+    "q720": "HD (720p)",
+    "q480": "SD (480p)",
+    "audio": "Audio Only (MP3)"
+  },
+  "themes": {
+    "green": "Matrix Green",
+    "amber": "Retro Amber",
+    "cyan": "Cyber Cyan"
+  },
+  "download": {
+    "urlPlaceholder": "https://www.youtube.com/watch?v=...",
+    "fetch": "FETCH",
+    "startDownload": "START DOWNLOAD",
+    "cancel": "CANCEL",
+    "qualityLabel": "Quality:",
+    "fetchingInfo": "Fetching info for: ",
+    "errorPrefix": "Error: ",
+    "startingDownload": "Starting download: ",
+    "cancellingDownload": "Cancelling download...",
+    "downloadError": "ERROR: ",
+    "downloadComplete": "Download complete: "
+  },
+  "queue": {
+    "urlsPlaceholder": "Paste URLs here, one per line...",
+    "addToQueue": "Add to Queue",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "remove": "Remove",
+    "emptyState": "[ Queue empty ]",
+    "total": "TOTAL: ",
+    "active": "ACTIVE: ",
+    "pending": "PENDING: ",
+    "done": "DONE: ",
+    "errors": "ERRORS: "
+  },
+  "history": {
+    "searchPlaceholder": "Search history...",
+    "clearAll": "CLEAR",
+    "emptyState": "[ No entries ]",
+    "delete": "DEL"
+  },
+  "settings": {
+    "loadingSettings": "Loading settings...",
+    "sectionDownload": "Download",
+    "sectionAppearance": "Appearance",
+    "sectionAdvanced": "Advanced",
+    "downloadDirectory": "Download directory",
+    "defaultQuality": "Default quality",
+    "embedThumbnail": "Embed thumbnail",
+    "embedMetadata": "Embed metadata",
+    "theme": "Theme",
+    "matrixRainEffect": "Matrix rain effect",
+    "crtScanlineEffect": "CRT scanline effect",
+    "maxConcurrentDownloads": "Max concurrent downloads",
+    "autoPasteClipboard": "Auto-paste from clipboard",
+    "language": "Language",
+    "browserCookies": "Browser cookies",
+    "cookiesWarning": "Gives yt-dlp access to your browser cookies, including auth data from other sites.",
+    "browse": "BROWSE"
+  },
+  "cookies": {
+    "none": "None",
+    "chrome": "Chrome",
+    "firefox": "Firefox",
+    "safari": "Safari",
+    "edge": "Edge",
+    "brave": "Brave"
+  },
+  "locales": {
+    "en": "English",
+    "ru": "Russian"
+  },
+  "progress": {
+    "downloading": "DOWNLOADING",
+    "merging": "MERGING",
+    "converting": "CONVERTING",
+    "done": "DONE",
+    "error": "ERROR",
+    "eta": "ETA "
+  },
+  "common": {
+    "waitingForOutput": "Waiting for output...",
+    "downloading": "downloading"
+  },
+  "about": {
+    "version": "Version",
+    "engine": "Engine",
+    "platform": "Platform",
+    "builtWith": "Built with",
+    "links": "Links",
+    "sourceCode": "Source Code",
+    "ytdlpProject": "yt-dlp Project"
+  }
+}
