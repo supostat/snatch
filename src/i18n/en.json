@@ -103,7 +103,18 @@
   },
   "deps": {
     "ytdlpMissing": "yt-dlp not found",
-    "ytdlpInstallHint": "Install yt-dlp to enable video downloads:"
+    "ffmpegMissing": "ffmpeg not found",
+    "bothMissing": "yt-dlp and ffmpeg not found",
+    "installHint": "Required dependencies are missing. Install automatically?",
+    "installButton": "INSTALL",
+    "installFailed": "Installation failed",
+    "stage": {
+      "downloading": "downloading",
+      "extracting": "extracting",
+      "verifying": "verifying",
+      "done": "done",
+      "error": "error"
+    }
   },
   "about": {
     "version": "Version",

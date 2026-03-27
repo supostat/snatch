@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { DependencyBanner } from "../components/features/DependencyBanner";
 import { DownloadButton } from "../components/features/DownloadButton";
 import { QualityPicker } from "../components/features/QualityPicker";
 import { UrlInput } from "../components/features/UrlInput";
@@ -22,6 +23,8 @@ export function DownloadPage() {
   const download = useDownload();
   const { t } = useI18n();
   const isYtdlpAvailable = useAppStore((state) => state.isYtdlpAvailable);
+  const isFfmpegAvailable = useAppStore((state) => state.isFfmpegAvailable);
+  const isDepsReady = isYtdlpAvailable && isFfmpegAvailable;
 
   const handleClipboardUrl = useCallback((newUrl: string) => {
     setClipboardUrl(newUrl);
@@ -54,20 +57,12 @@ export function DownloadPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4 h-full overflow-y-auto">
-      {!isYtdlpAvailable && (
-        <div className="border border-hacker-amber bg-hacker-amber/5 p-4 font-mono text-xs space-y-2">
-          <div className="text-hacker-amber font-bold">{t("deps.ytdlpMissing")}</div>
-          <div className="text-hacker-text-dim">{t("deps.ytdlpInstallHint")}</div>
-          <code className="block text-[var(--accent)] bg-hacker-bg px-3 py-2 border border-hacker-border">
-            brew install yt-dlp
-          </code>
-        </div>
-      )}
+      <DependencyBanner />
 
       <UrlInput
         onFetch={handleFetch}
         isLoading={download.isLoadingInfo}
-        disabled={download.isDownloading || !isYtdlpAvailable}
+        disabled={download.isDownloading || !isDepsReady}
         externalUrl={clipboardUrl}
       />
 

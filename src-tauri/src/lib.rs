@@ -5,6 +5,8 @@ pub mod services;
 pub mod validators;
 
 use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
 use std::sync::{Mutex, RwLock};
 
 use models::download::DownloadHandle;
@@ -12,19 +14,22 @@ use services::audit::AuditService;
 use services::clipboard::ClipboardWatcher;
 use services::history::HistoryService;
 use services::settings::SettingsService;
-use services::ytdlp::{resolve_ytdlp_binary, YtdlpRunner};
+use services::ytdlp::{resolve_ffmpeg_binary, resolve_ytdlp_binary, YtdlpRunner};
 
 pub struct AppState {
     pub ytdlp_runner: YtdlpRunner,
+    pub ffmpeg_path: RwLock<Option<PathBuf>>,
     pub active_downloads: Mutex<HashMap<String, DownloadHandle>>,
     pub settings: RwLock<SettingsService>,
     pub history: RwLock<HistoryService>,
     pub audit: Mutex<AuditService>,
+    pub binary_download_in_progress: AtomicBool,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let binary_path = resolve_ytdlp_binary().ok();
+    let ffmpeg_path = resolve_ffmpeg_binary().ok();
 
     let snatch_dir = dirs::home_dir()
         .map(|home| home.join(".snatch"))
@@ -35,12 +40,14 @@ pub fn run() {
 
     let app_state = AppState {
         ytdlp_runner: YtdlpRunner::new(binary_path),
+        ffmpeg_path: RwLock::new(ffmpeg_path),
         active_downloads: Mutex::new(HashMap::new()),
         settings: RwLock::new(settings_service),
         history: RwLock::new(HistoryService::load_or_recreate(
             &snatch_dir.join("history.json"),
         )),
         audit: Mutex::new(AuditService::new(&snatch_dir)),
+        binary_download_in_progress: AtomicBool::new(false),
     };
 
     if let Err(error) = tauri::Builder::default()
@@ -72,6 +79,7 @@ pub fn run() {
             commands::window::get_downloads_path,
             commands::window::get_app_version,
             commands::system::check_dependencies,
+            commands::system::download_binaries,
         ])
         .run(tauri::generate_context!())
     {

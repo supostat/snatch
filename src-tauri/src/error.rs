@@ -33,6 +33,15 @@ pub enum AppError {
     #[error("Window error: {0}")]
     Window(String),
 
+    #[error("Binary download failed: {0}")]
+    BinaryDownload(String),
+
+    #[error("ffmpeg binary not found")]
+    FfmpegNotFound,
+
+    #[error("Unsupported platform: {0}")]
+    UnsupportedPlatform(String),
+
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 

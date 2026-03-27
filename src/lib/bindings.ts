@@ -9,6 +9,7 @@ import type {
   HistoryEntry,
   CookiesBrowser,
   DependencyStatus,
+  BinaryDownloadProgress,
 } from "./types";
 
 export const api = {
@@ -75,6 +76,11 @@ export const api = {
     getVersion: () => invoke<string>("get_app_version"),
 
     checkDependencies: () => invoke<DependencyStatus>("check_dependencies"),
+
+    downloadBinaries: () => invoke<DependencyStatus>("download_binaries"),
+
+    onBinaryDownloadProgress: (callback: (progress: BinaryDownloadProgress) => void): Promise<UnlistenFn> =>
+      listen<BinaryDownloadProgress>("binary:download-progress", (event) => callback(event.payload)),
   },
 
   clipboard: {

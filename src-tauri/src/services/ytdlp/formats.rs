@@ -16,6 +16,7 @@ pub fn build_download_args(
     url: &ValidatedUrl,
     options: &DownloadOptions,
     output_dir: &SafePath,
+    ffmpeg_location: Option<&std::path::Path>,
 ) -> Vec<String> {
     let mut args: Vec<String> = options
         .quality
@@ -43,6 +44,13 @@ pub fn build_download_args(
     }
 
     append_cookies_args(&mut args, &options.cookies_browser);
+
+    if let Some(ffmpeg_path) = ffmpeg_location {
+        if let Some(parent) = ffmpeg_path.parent() {
+            args.push("--ffmpeg-location".to_string());
+            args.push(parent.to_string_lossy().to_string());
+        }
+    }
 
     args.push("--newline".to_string());
     args.push("--no-playlist".to_string());
@@ -114,7 +122,7 @@ mod tests {
         let url = test_url();
         let options = test_options(QualityPreset::Best);
         let output_dir = test_safe_path();
-        let args = build_download_args(&url, &options, &output_dir);
+        let args = build_download_args(&url, &options, &output_dir, None);
         assert!(args.contains(&"-f".to_string()));
         assert!(args.contains(&"--newline".to_string()));
         assert!(args.contains(&"--no-playlist".to_string()));
@@ -126,7 +134,7 @@ mod tests {
         let url = test_url();
         let options = test_options(QualityPreset::Audio);
         let output_dir = test_safe_path();
-        let args = build_download_args(&url, &options, &output_dir);
+        let args = build_download_args(&url, &options, &output_dir, None);
         assert!(args.contains(&"-x".to_string()));
         assert!(args.contains(&"--audio-format".to_string()));
     }
@@ -138,7 +146,7 @@ mod tests {
         options.embed_thumbnail = true;
         options.embed_metadata = true;
         let output_dir = test_safe_path();
-        let args = build_download_args(&url, &options, &output_dir);
+        let args = build_download_args(&url, &options, &output_dir, None);
         assert!(args.contains(&"--embed-thumbnail".to_string()));
         assert!(args.contains(&"--embed-metadata".to_string()));
     }
@@ -148,7 +156,7 @@ mod tests {
         let url = test_url();
         let options = test_options(QualityPreset::Best);
         let output_dir = test_safe_path();
-        let args = build_download_args(&url, &options, &output_dir);
+        let args = build_download_args(&url, &options, &output_dir, None);
         let output_arg_idx = args.iter().position(|a| a == "--output").unwrap();
         let template = &args[output_arg_idx + 1];
         assert!(template.contains("%(title)s.%(ext)s"));
@@ -160,7 +168,7 @@ mod tests {
         let mut options = test_options(QualityPreset::Best);
         options.cookies_browser = CookiesBrowser::Firefox;
         let output_dir = test_safe_path();
-        let args = build_download_args(&url, &options, &output_dir);
+        let args = build_download_args(&url, &options, &output_dir, None);
         assert!(args.contains(&"--cookies-from-browser".to_string()));
         assert!(args.contains(&"firefox".to_string()));
     }
@@ -179,7 +187,7 @@ mod tests {
         ];
         for preset in presets {
             let options = test_options(preset);
-            let args = build_download_args(&url, &options, &output_dir);
+            let args = build_download_args(&url, &options, &output_dir, None);
             assert!(!args.is_empty());
             assert_eq!(args.last().unwrap(), url.as_str());
         }

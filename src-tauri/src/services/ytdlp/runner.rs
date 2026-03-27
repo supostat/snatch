@@ -22,25 +22,40 @@ const PROGRESS_THROTTLE_MS: u128 = 250;
 const CANCEL_GRACE_PERIOD_SECS: u64 = 5;
 
 pub struct YtdlpRunner {
-    binary_path: Option<PathBuf>,
+    binary_path: std::sync::RwLock<Option<PathBuf>>,
 }
 
 impl YtdlpRunner {
     pub fn new(binary_path: Option<PathBuf>) -> Self {
-        Self { binary_path }
+        Self {
+            binary_path: std::sync::RwLock::new(binary_path),
+        }
     }
 
-    fn binary_path(&self) -> Result<&Path, AppError> {
-        self.binary_path.as_deref().ok_or(AppError::YtdlpNotFound)
+    fn get_binary_path(&self) -> Result<PathBuf, AppError> {
+        self.binary_path
+            .read()
+            .map_err(|_| AppError::YtdlpFailed("lock error".to_string()))?
+            .clone()
+            .ok_or(AppError::YtdlpNotFound)
     }
 
     pub fn is_available(&self) -> bool {
-        self.binary_path.is_some()
+        self.binary_path
+            .read()
+            .map(|path| path.is_some())
+            .unwrap_or(false)
+    }
+
+    pub fn update_binary_path(&self, path: PathBuf) {
+        if let Ok(mut guard) = self.binary_path.write() {
+            *guard = Some(path);
+        }
     }
 
     pub async fn get_version(&self) -> Result<String, AppError> {
-        let binary = self.binary_path()?;
-        let output = Command::new(binary)
+        let binary = self.get_binary_path()?;
+        let output = Command::new(&binary)
             .arg("--version")
             .output()
             .await
@@ -58,7 +73,7 @@ impl YtdlpRunner {
         url: &ValidatedUrl,
         cookies_browser: &CookiesBrowser,
     ) -> Result<VideoInfo, AppError> {
-        let binary = self.binary_path()?;
+        let binary = self.get_binary_path()?;
         let args = formats::build_info_args(url, cookies_browser);
 
         let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
@@ -85,22 +100,24 @@ impl YtdlpRunner {
         info::parse_video_info(&stdout)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn download(
         &self,
         download_id: String,
         url: &ValidatedUrl,
         options: &DownloadOptions,
         output_dir: &SafePath,
+        ffmpeg_location: Option<&Path>,
         cancel_token: CancellationToken,
         app_handle: AppHandle,
     ) -> Result<DownloadResult, AppError> {
-        let binary = self.binary_path()?;
-        let args = formats::build_download_args(url, options, output_dir);
+        let binary = self.get_binary_path()?;
+        let args = formats::build_download_args(url, options, output_dir, ffmpeg_location);
 
         let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
         validate_ytdlp_flags(&args_refs)?;
 
-        let mut child = Command::new(binary)
+        let mut child = Command::new(&binary)
             .args(&args)
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
@@ -268,14 +285,28 @@ mod tests {
     #[test]
     fn runner_without_binary_returns_not_found() {
         let runner = YtdlpRunner::new(None);
-        assert!(runner.binary_path().is_err());
+        assert!(runner.get_binary_path().is_err());
+        assert!(!runner.is_available());
     }
 
     #[test]
     fn runner_with_binary_returns_path() {
         let path = PathBuf::from("/usr/local/bin/yt-dlp");
         let runner = YtdlpRunner::new(Some(path.clone()));
-        assert_eq!(runner.binary_path().unwrap(), path.as_path());
+        assert_eq!(runner.get_binary_path().unwrap(), path);
+        assert!(runner.is_available());
+    }
+
+    #[test]
+    fn runner_update_binary_path() {
+        let runner = YtdlpRunner::new(None);
+        assert!(!runner.is_available());
+        runner.update_binary_path(PathBuf::from("/tmp/yt-dlp"));
+        assert!(runner.is_available());
+        assert_eq!(
+            runner.get_binary_path().unwrap(),
+            PathBuf::from("/tmp/yt-dlp")
+        );
     }
 
     #[test]

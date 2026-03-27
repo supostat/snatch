@@ -14,6 +14,7 @@ const YTDLP_FLAGS_WHITELIST: &[&str] = &[
     "--embed-metadata",
     "--cookies-from-browser",
     "--merge-output-format",
+    "--ffmpeg-location",
     "--dump-json",
     "--no-playlist",
     "--playlist-items",

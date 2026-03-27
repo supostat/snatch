@@ -103,7 +103,18 @@
   },
   "deps": {
     "ytdlpMissing": "yt-dlp не найден",
-    "ytdlpInstallHint": "Установите yt-dlp для загрузки видео:"
+    "ffmpegMissing": "ffmpeg не найден",
+    "bothMissing": "yt-dlp и ffmpeg не найдены",
+    "installHint": "Необходимые зависимости отсутствуют. Установить автоматически?",
+    "installButton": "УСТАНОВИТЬ",
+    "installFailed": "Ошибка установки",
+    "stage": {
+      "downloading": "загрузка",
+      "extracting": "распаковка",
+      "verifying": "проверка",
+      "done": "готово",
+      "error": "ошибка"
+    }
   },
   "about": {
     "version": "Версия",

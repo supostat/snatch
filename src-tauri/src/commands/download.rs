@@ -55,6 +55,12 @@ pub async fn yt_download(
         );
     }
 
+    let ffmpeg_location = state
+        .ffmpeg_path
+        .read()
+        .ok()
+        .and_then(|guard| guard.clone());
+
     let result = state
         .ytdlp_runner
         .download(
@@ -62,6 +68,7 @@ pub async fn yt_download(
             &validated_url,
             &options,
             &safe_path,
+            ffmpeg_location.as_deref(),
             cancel_token,
             app_handle,
         )

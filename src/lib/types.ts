@@ -109,4 +109,13 @@ export type TabId = "download" | "queue" | "history" | "settings" | "about";
 export interface DependencyStatus {
   ytdlpAvailable: boolean;
   ytdlpVersion: string | null;
+  ffmpegAvailable: boolean;
+}
+
+export interface BinaryDownloadProgress {
+  binary: string;
+  downloadedBytes: number;
+  totalBytes: number | null;
+  percent: number;
+  stage: "downloading" | "extracting" | "verifying" | "done" | "error";
 }
