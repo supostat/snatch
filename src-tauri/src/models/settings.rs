@@ -35,7 +35,7 @@ pub struct Settings {
     #[serde(default = "default_true")]
     pub embed_metadata: bool,
 
-    #[serde(default = "default_true")]
+    #[serde(default)]
     pub auto_clipboard: bool,
 
     #[serde(default = "default_max_concurrent")]

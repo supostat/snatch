@@ -100,7 +100,11 @@ mod tests {
     #[test]
     fn resolve_returns_error_when_no_binary() {
         let dir = temp_dir("empty");
+        // Temporarily clear PATH so debug-mode PATH fallback doesn't find yt-dlp
+        let original_path = std::env::var("PATH").unwrap_or_default();
+        std::env::set_var("PATH", "");
         let result = resolve_from_dir(&dir);
+        std::env::set_var("PATH", &original_path);
         assert!(result.is_err());
         let _ = fs::remove_dir_all(&dir);
     }
