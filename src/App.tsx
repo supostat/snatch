@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { MainLayout } from "./components/layout/MainLayout";
 import { api } from "./lib/bindings";
 import { useSettings } from "./hooks/useSettings";
@@ -11,15 +12,20 @@ export function App() {
   const setFfmpegAvailable = useAppStore((state) => state.setFfmpegAvailable);
 
   useEffect(() => {
-    loadSettings();
-    api.app.checkDependencies().then((status) => {
-      setYtdlpAvailable(status.ytdlpAvailable);
-      setYtdlpVersion(status.ytdlpVersion);
-      setFfmpegAvailable(status.ffmpegAvailable);
-    }).catch(() => {
-      setYtdlpAvailable(false);
-      setFfmpegAvailable(false);
-    });
+    async function initialize() {
+      await loadSettings();
+      try {
+        const status = await api.app.checkDependencies();
+        setYtdlpAvailable(status.ytdlpAvailable);
+        setYtdlpVersion(status.ytdlpVersion);
+        setFfmpegAvailable(status.ffmpegAvailable);
+      } catch {
+        setYtdlpAvailable(false);
+        setFfmpegAvailable(false);
+      }
+      await getCurrentWindow().show();
+    }
+    initialize();
   }, [loadSettings, setYtdlpAvailable, setYtdlpVersion, setFfmpegAvailable]);
 
   const settings = useAppStore((state) => state.settings);
