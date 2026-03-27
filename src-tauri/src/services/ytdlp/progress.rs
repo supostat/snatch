@@ -32,23 +32,19 @@ static DOWNLOAD_PROGRESS: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 static DOWNLOAD_DONE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\[download\]\s+100%\s+of\s+(\S+)")
-        .expect("download done regex is valid")
+    Regex::new(r"\[download\]\s+100%\s+of\s+(\S+)").expect("download done regex is valid")
 });
 
 static MERGER: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"\[Merger\] Merging formats into "(.+)""#)
-        .expect("merger regex is valid")
+    Regex::new(r#"\[Merger\] Merging formats into "(.+)""#).expect("merger regex is valid")
 });
 
 static EXTRACT_AUDIO: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\[ExtractAudio\] Destination: (.+)")
-        .expect("extract audio regex is valid")
+    Regex::new(r"\[ExtractAudio\] Destination: (.+)").expect("extract audio regex is valid")
 });
 
 static DESTINATION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\[download\] Destination: (.+)")
-        .expect("destination regex is valid")
+    Regex::new(r"\[download\] Destination: (.+)").expect("destination regex is valid")
 });
 
 static ALREADY_DOWNLOADED: LazyLock<Regex> = LazyLock::new(|| {
@@ -209,13 +205,17 @@ mod tests {
     fn parse_integer_percent() {
         let line = "[download]  5% of ~50.00MiB at 1.00MiB/s ETA 00:45";
         let result = parse_progress_line(line);
-        assert!(matches!(result, Some(ProgressUpdate::Download { percent, .. }) if (percent - 5.0).abs() < f64::EPSILON));
+        assert!(
+            matches!(result, Some(ProgressUpdate::Download { percent, .. }) if (percent - 5.0).abs() < f64::EPSILON)
+        );
     }
 
     #[test]
     fn parse_kib_speed() {
         let line = "[download]  12.0% of ~200.00MiB at 512.00KiB/s ETA 06:23";
         let result = parse_progress_line(line);
-        assert!(matches!(result, Some(ProgressUpdate::Download { speed: Some(s), .. }) if s == "512.00KiB/s"));
+        assert!(
+            matches!(result, Some(ProgressUpdate::Download { speed: Some(s), .. }) if s == "512.00KiB/s")
+        );
     }
 }

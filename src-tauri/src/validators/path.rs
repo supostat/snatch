@@ -22,20 +22,15 @@ impl SafePath {
         }
 
         if path.contains("..") {
-            return Err(AppError::InvalidPath(
-                "path traversal detected".to_string(),
-            ));
+            return Err(AppError::InvalidPath("path traversal detected".to_string()));
         }
 
         // canonicalize resolves symlinks to their real target path,
         // so the subsequent starts_with check rejects symlinks pointing outside allowed dirs
-        let canonical = std::fs::canonicalize(&path_buf).map_err(|_| {
-            AppError::InvalidPath(format!("path does not exist: {path}"))
-        })?;
+        let canonical = std::fs::canonicalize(&path_buf)
+            .map_err(|_| AppError::InvalidPath(format!("path does not exist: {path}")))?;
 
-        let is_within_allowed = allowed_dirs
-            .iter()
-            .any(|dir| canonical.starts_with(dir));
+        let is_within_allowed = allowed_dirs.iter().any(|dir| canonical.starts_with(dir));
 
         if !is_within_allowed {
             return Err(AppError::InvalidPath(
@@ -77,10 +72,7 @@ mod tests {
         let test_file = allowed.join("test.txt");
         fs::write(&test_file, "test").expect("write test file");
 
-        let result = SafePath::new(
-            &test_file.to_string_lossy(),
-            &[allowed.clone()],
-        );
+        let result = SafePath::new(&test_file.to_string_lossy(), &[allowed.clone()]);
         assert!(result.is_ok());
         assert!(result.unwrap().as_path().starts_with(&allowed));
 
@@ -139,11 +131,11 @@ mod tests {
         let symlink_path = allowed.join("link_to_secret.txt");
         unix_fs::symlink(&outside_file, &symlink_path).expect("create symlink");
 
-        let result = SafePath::new(
-            &symlink_path.to_string_lossy(),
-            &[allowed.clone()],
+        let result = SafePath::new(&symlink_path.to_string_lossy(), &[allowed.clone()]);
+        assert!(
+            result.is_err(),
+            "symlink pointing outside allowed scope must be rejected"
         );
-        assert!(result.is_err(), "symlink pointing outside allowed scope must be rejected");
 
         cleanup_temp_dir(&allowed);
         cleanup_temp_dir(&outside);

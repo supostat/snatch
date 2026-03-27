@@ -72,7 +72,9 @@ mod tests {
 
     #[test]
     fn accept_youtube_playlist() {
-        let result = ValidatedUrl::new("https://www.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf");
+        let result = ValidatedUrl::new(
+            "https://www.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf",
+        );
         assert!(result.is_ok());
     }
 
@@ -96,7 +98,10 @@ mod tests {
 
     #[test]
     fn reject_url_exceeding_max_length() {
-        let long_url = format!("https://www.youtube.com/watch?v=dQw4w9WgXcQ&{}", "x".repeat(2048));
+        let long_url = format!(
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ&{}",
+            "x".repeat(2048)
+        );
         let result = ValidatedUrl::new(&long_url);
         assert!(result.is_err());
     }

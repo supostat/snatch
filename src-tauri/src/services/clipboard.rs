@@ -46,9 +46,7 @@ impl ClipboardWatcher {
     }
 
     fn check_clipboard(&mut self, app_handle: &AppHandle) {
-        let clipboard_text = match arboard::Clipboard::new()
-            .and_then(|mut cb| cb.get_text())
-        {
+        let clipboard_text = match arboard::Clipboard::new().and_then(|mut cb| cb.get_text()) {
             Ok(text) => text,
             Err(_) => return,
         };
@@ -124,9 +122,7 @@ mod tests {
             "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         ));
         assert!(is_youtube_url("https://youtu.be/dQw4w9WgXcQ"));
-        assert!(is_youtube_url(
-            "https://www.youtube.com/shorts/dQw4w9WgXcQ"
-        ));
+        assert!(is_youtube_url("https://www.youtube.com/shorts/dQw4w9WgXcQ"));
         assert!(!is_youtube_url("https://evil.com/watch?v=dQw4w9WgXcQ"));
         assert!(!is_youtube_url("not a url"));
         assert!(!is_youtube_url(""));

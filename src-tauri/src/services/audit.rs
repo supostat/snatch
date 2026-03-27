@@ -113,7 +113,8 @@ mod tests {
 
     #[test]
     fn log_event_creates_file_and_appends() {
-        let temp_dir = std::env::temp_dir().join(format!("snatch_audit_test_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("snatch_audit_test_{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(&temp_dir).unwrap();
 
         let service = AuditService::new(&temp_dir);
@@ -131,7 +132,8 @@ mod tests {
 
     #[test]
     fn hash_value_is_deterministic_within_session() {
-        let temp_dir = std::env::temp_dir().join(format!("snatch_audit_hash_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("snatch_audit_hash_{}", uuid::Uuid::new_v4()));
         let service = AuditService::new(&temp_dir);
 
         let hash1 = service.hash_value("test_input");
@@ -143,7 +145,8 @@ mod tests {
 
     #[test]
     fn hash_value_differs_for_different_inputs() {
-        let temp_dir = std::env::temp_dir().join(format!("snatch_audit_diff_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("snatch_audit_diff_{}", uuid::Uuid::new_v4()));
         let service = AuditService::new(&temp_dir);
 
         let hash1 = service.hash_value("input_a");
@@ -155,7 +158,8 @@ mod tests {
 
     #[test]
     fn hash_value_differs_across_sessions() {
-        let temp_dir = std::env::temp_dir().join(format!("snatch_audit_sess_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("snatch_audit_sess_{}", uuid::Uuid::new_v4()));
         let service1 = AuditService::new(&temp_dir);
         let service2 = AuditService::new(&temp_dir);
 

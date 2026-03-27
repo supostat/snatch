@@ -16,7 +16,10 @@ pub async fn yt_get_info(
     state: State<'_, AppState>,
 ) -> Result<VideoInfo, AppError> {
     let validated_url = ValidatedUrl::new(&url)?;
-    state.ytdlp_runner.get_info(&validated_url, &cookies_browser).await
+    state
+        .ytdlp_runner
+        .get_info(&validated_url, &cookies_browser)
+        .await
 }
 
 #[tauri::command]
@@ -40,9 +43,10 @@ pub async fn yt_download(
     let cancel_token = CancellationToken::new();
 
     {
-        let mut downloads = state.active_downloads.lock().map_err(|_| {
-            AppError::YtdlpFailed("internal lock error".to_string())
-        })?;
+        let mut downloads = state
+            .active_downloads
+            .lock()
+            .map_err(|_| AppError::YtdlpFailed("internal lock error".to_string()))?;
         downloads.insert(
             download_id.clone(),
             DownloadHandle {
@@ -64,9 +68,10 @@ pub async fn yt_download(
         .await;
 
     {
-        let mut downloads = state.active_downloads.lock().map_err(|_| {
-            AppError::YtdlpFailed("internal lock error".to_string())
-        })?;
+        let mut downloads = state
+            .active_downloads
+            .lock()
+            .map_err(|_| AppError::YtdlpFailed("internal lock error".to_string()))?;
         downloads.remove(&download_id);
     }
 
@@ -74,14 +79,12 @@ pub async fn yt_download(
 }
 
 #[tauri::command]
-pub async fn yt_cancel(
-    download_id: String,
-    state: State<'_, AppState>,
-) -> Result<(), AppError> {
+pub async fn yt_cancel(download_id: String, state: State<'_, AppState>) -> Result<(), AppError> {
     let cancel_token = {
-        let downloads = state.active_downloads.lock().map_err(|_| {
-            AppError::YtdlpFailed("internal lock error".to_string())
-        })?;
+        let downloads = state
+            .active_downloads
+            .lock()
+            .map_err(|_| AppError::YtdlpFailed("internal lock error".to_string()))?;
         match downloads.get(&download_id) {
             Some(handle) => handle.cancel_token.clone(),
             None => {

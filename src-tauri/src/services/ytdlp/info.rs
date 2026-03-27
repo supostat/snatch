@@ -124,7 +124,10 @@ mod tests {
 
     #[test]
     fn upload_date_formatting() {
-        assert_eq!(format_upload_date("20240115"), Some("2024-01-15".to_string()));
+        assert_eq!(
+            format_upload_date("20240115"),
+            Some("2024-01-15".to_string())
+        );
         assert_eq!(format_upload_date("invalid"), None);
         assert_eq!(format_upload_date("2024"), None);
         assert_eq!(format_upload_date(""), None);

@@ -5,12 +5,11 @@ use crate::models::settings::Settings;
 use crate::AppState;
 
 #[tauri::command]
-pub async fn settings_get_all(
-    state: State<'_, AppState>,
-) -> Result<Settings, AppError> {
-    let service = state.settings.read().map_err(|_| {
-        AppError::Settings("internal lock error".to_string())
-    })?;
+pub async fn settings_get_all(state: State<'_, AppState>) -> Result<Settings, AppError> {
+    let service = state
+        .settings
+        .read()
+        .map_err(|_| AppError::Settings("internal lock error".to_string()))?;
     Ok(service.get_all())
 }
 
@@ -19,9 +18,10 @@ pub async fn settings_get(
     key: String,
     state: State<'_, AppState>,
 ) -> Result<serde_json::Value, AppError> {
-    let service = state.settings.read().map_err(|_| {
-        AppError::Settings("internal lock error".to_string())
-    })?;
+    let service = state
+        .settings
+        .read()
+        .map_err(|_| AppError::Settings("internal lock error".to_string()))?;
     service.get(&key)
 }
 
@@ -33,9 +33,10 @@ pub async fn settings_set(
 ) -> Result<(), AppError> {
     let is_cookies_change = key == "cookiesBrowser";
 
-    let mut service = state.settings.write().map_err(|_| {
-        AppError::Settings("internal lock error".to_string())
-    })?;
+    let mut service = state
+        .settings
+        .write()
+        .map_err(|_| AppError::Settings("internal lock error".to_string()))?;
     let result = service.set(&key, value.clone());
 
     if is_cookies_change {

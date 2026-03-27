@@ -186,12 +186,15 @@ impl YtdlpRunner {
                     return Err(AppError::YtdlpFailed(last_line.to_string()));
                 }
             }
-            return Err(AppError::YtdlpFailed("yt-dlp exited with non-zero status".to_string()));
+            return Err(AppError::YtdlpFailed(
+                "yt-dlp exited with non-zero status".to_string(),
+            ));
         }
 
-        let _ = app_handle.emit("yt:progress", &make_progress(
-            &download_id, 100.0, &DownloadStage::Done, None, None, None,
-        ));
+        let _ = app_handle.emit(
+            "yt:progress",
+            &make_progress(&download_id, 100.0, &DownloadStage::Done, None, None, None),
+        );
 
         let file_size = last_file_path
             .as_deref()
@@ -207,9 +210,7 @@ impl YtdlpRunner {
         })
     }
 
-    async fn cancel_child(
-        child: &mut tokio::process::Child,
-    ) -> Result<DownloadResult, AppError> {
+    async fn cancel_child(child: &mut tokio::process::Child) -> Result<DownloadResult, AppError> {
         #[cfg(unix)]
         if let Some(pid) = child.id() {
             let _ = nix::sys::signal::kill(
@@ -279,7 +280,14 @@ mod tests {
 
     #[test]
     fn make_progress_creates_correct_payload() {
-        let payload = make_progress("test-id", 50.0, &DownloadStage::Downloading, Some("1MiB/s".into()), None, None);
+        let payload = make_progress(
+            "test-id",
+            50.0,
+            &DownloadStage::Downloading,
+            Some("1MiB/s".into()),
+            None,
+            None,
+        );
         assert_eq!(payload.download_id, "test-id");
         assert!((payload.percent - 50.0).abs() < f64::EPSILON);
         assert_eq!(payload.stage, DownloadStage::Downloading);

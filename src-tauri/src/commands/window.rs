@@ -42,5 +42,9 @@ pub async fn get_downloads_path() -> Result<String, AppError> {
 
 #[tauri::command]
 pub async fn get_app_version(app_handle: AppHandle) -> Result<String, AppError> {
-    Ok(app_handle.config().version.clone().unwrap_or_else(|| "unknown".to_string()))
+    Ok(app_handle
+        .config()
+        .version
+        .clone()
+        .unwrap_or_else(|| "unknown".to_string()))
 }

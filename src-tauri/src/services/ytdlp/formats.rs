@@ -1,13 +1,10 @@
-use crate::models::quality::CookiesBrowser;
 use crate::models::download::DownloadOptions;
+use crate::models::quality::CookiesBrowser;
 use crate::validators::path::SafePath;
 use crate::validators::url::ValidatedUrl;
 
 pub fn build_info_args(url: &ValidatedUrl, cookies_browser: &CookiesBrowser) -> Vec<String> {
-    let mut args = vec![
-        "--dump-json".to_string(),
-        "--no-playlist".to_string(),
-    ];
+    let mut args = vec!["--dump-json".to_string(), "--no-playlist".to_string()];
 
     append_cookies_args(&mut args, cookies_browser);
 
@@ -33,10 +30,7 @@ pub fn build_download_args(
         args.push("mp4".to_string());
     }
 
-    let output_template = format!(
-        "{}/%(title)s.%(ext)s",
-        output_dir.as_path().display()
-    );
+    let output_template = format!("{}/%(title)s.%(ext)s", output_dir.as_path().display());
     args.push("--output".to_string());
     args.push(output_template);
 
@@ -83,11 +77,7 @@ mod tests {
         // Use temp dir which exists and is absolute
         let tmp = std::env::temp_dir();
         let canonical = std::fs::canonicalize(&tmp).unwrap();
-        SafePath::new(
-            &canonical.to_string_lossy(),
-            &[canonical.clone()],
-        )
-        .unwrap()
+        SafePath::new(&canonical.to_string_lossy(), &[canonical.clone()]).unwrap()
     }
 
     fn test_options(quality: QualityPreset) -> DownloadOptions {

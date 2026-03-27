@@ -37,7 +37,9 @@ pub fn run() {
         ytdlp_runner: YtdlpRunner::new(binary_path),
         active_downloads: Mutex::new(HashMap::new()),
         settings: RwLock::new(settings_service),
-        history: RwLock::new(HistoryService::load_or_recreate(&snatch_dir.join("history.json"))),
+        history: RwLock::new(HistoryService::load_or_recreate(
+            &snatch_dir.join("history.json"),
+        )),
         audit: Mutex::new(AuditService::new(&snatch_dir)),
     };
 

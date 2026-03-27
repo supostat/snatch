@@ -12,9 +12,7 @@ pub struct DependencyStatus {
 }
 
 #[tauri::command]
-pub async fn check_dependencies(
-    state: State<'_, AppState>,
-) -> Result<DependencyStatus, AppError> {
+pub async fn check_dependencies(state: State<'_, AppState>) -> Result<DependencyStatus, AppError> {
     let ytdlp_available = state.ytdlp_runner.is_available();
     let ytdlp_version = if ytdlp_available {
         state.ytdlp_runner.get_version().await.ok()

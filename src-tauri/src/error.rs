@@ -72,14 +72,20 @@ mod tests {
     fn serialize_invalid_url_to_string() {
         let error = AppError::InvalidUrl("evil.com".to_string());
         let json = serde_json::to_value(&error).expect("serialize error");
-        assert_eq!(json, serde_json::Value::String("Invalid YouTube URL: evil.com".to_string()));
+        assert_eq!(
+            json,
+            serde_json::Value::String("Invalid YouTube URL: evil.com".to_string())
+        );
     }
 
     #[test]
     fn serialize_ytdlp_not_found() {
         let error = AppError::YtdlpNotFound;
         let json = serde_json::to_value(&error).expect("serialize error");
-        assert_eq!(json, serde_json::Value::String("yt-dlp binary not found".to_string()));
+        assert_eq!(
+            json,
+            serde_json::Value::String("yt-dlp binary not found".to_string())
+        );
     }
 
     #[test]
