@@ -23,12 +23,14 @@ pub async fn open_path(
     let allowed_dirs = build_allowed_dirs();
     let _safe = SafePath::new(&path, &allowed_dirs)?;
 
-    opener::open(&path)
-        .map_err(|e| AppError::Dialog(format!("failed to open path: {e}")))?;
+    let result = opener::open(&path)
+        .map_err(|e| AppError::Dialog(format!("failed to open path: {e}")));
 
-    // AppState used for SafePath validation context
-    let _ = &state;
-    Ok(())
+    if let Ok(audit) = state.audit.lock() {
+        audit.log_event("open_path", &path, if result.is_ok() { "ok" } else { "error" });
+    }
+
+    result
 }
 
 #[tauri::command]
@@ -53,11 +55,14 @@ pub async fn show_in_folder(
     let allowed_dirs = build_allowed_dirs();
     let _safe = SafePath::new(&path, &allowed_dirs)?;
 
-    opener::reveal(&path)
-        .map_err(|e| AppError::Dialog(format!("failed to reveal in folder: {e}")))?;
+    let result = opener::reveal(&path)
+        .map_err(|e| AppError::Dialog(format!("failed to reveal in folder: {e}")));
 
-    let _ = &state;
-    Ok(())
+    if let Ok(audit) = state.audit.lock() {
+        audit.log_event("show_in_folder", &path, if result.is_ok() { "ok" } else { "error" });
+    }
+
+    result
 }
 
 fn build_allowed_dirs() -> Vec<std::path::PathBuf> {

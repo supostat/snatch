@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::sync::{Mutex, RwLock};
 
 use models::download::DownloadHandle;
+use services::audit::AuditService;
 use services::clipboard::ClipboardWatcher;
 use services::history::HistoryService;
 use services::settings::SettingsService;
@@ -18,6 +19,7 @@ pub struct AppState {
     pub active_downloads: Mutex<HashMap<String, DownloadHandle>>,
     pub settings: RwLock<SettingsService>,
     pub history: RwLock<HistoryService>,
+    pub audit: Mutex<AuditService>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -36,6 +38,7 @@ pub fn run() {
         active_downloads: Mutex::new(HashMap::new()),
         settings: RwLock::new(settings_service),
         history: RwLock::new(HistoryService::load_or_recreate(&snatch_dir.join("history.json"))),
+        audit: Mutex::new(AuditService::new(&snatch_dir)),
     };
 
     if let Err(error) = tauri::Builder::default()
