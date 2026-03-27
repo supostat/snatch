@@ -1,6 +1,9 @@
 .vault
 .claude
 .vscode
+SPEC.md
+.mcp.json
+docs/
 
 # Dependencies
 node_modules/
