@@ -105,3 +105,8 @@ export interface QueueItem {
 }
 
 export type TabId = "download" | "queue" | "history" | "settings" | "about";
+
+export interface DependencyStatus {
+  ytdlpAvailable: boolean;
+  ytdlpVersion: string | null;
+}

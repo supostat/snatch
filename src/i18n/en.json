@@ -95,12 +95,25 @@
     "waitingForOutput": "Waiting for output...",
     "downloading": "downloading"
   },
+  "player": {
+    "fullscreen": "Fullscreen",
+    "unsupported": "This format cannot be played in the app. Open in an external player.",
+    "openExternal": "Open in Player",
+    "showInFolder": "Show in Folder"
+  },
+  "deps": {
+    "ytdlpMissing": "yt-dlp not found",
+    "ytdlpInstallHint": "Install yt-dlp to enable video downloads:"
+  },
   "about": {
     "version": "Version",
     "engine": "Engine",
     "platform": "Platform",
     "builtWith": "Built with",
+    "authorLabel": "Author",
+    "website": "Website",
     "links": "Links",
+    "author": "byigor.dev",
     "sourceCode": "Source Code",
     "ytdlpProject": "yt-dlp Project"
   }

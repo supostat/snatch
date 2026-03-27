@@ -11,6 +11,17 @@ import { StatusBar } from "./StatusBar";
 import { TabNav } from "./TabNav";
 import { TitleBar } from "./TitleBar";
 
+function TabPanel({ visible, children }: { visible: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className={`absolute inset-0 ${visible ? "" : "hidden"}`}
+      aria-hidden={!visible}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function MainLayout() {
   const activeTab = useAppStore((state) => state.activeTab);
   const settings = useAppStore((state) => state.settings);
@@ -19,21 +30,26 @@ export function MainLayout() {
     <div className="flex h-full flex-col bg-hacker-bg">
       {settings?.showMatrixRain && <MatrixRain />}
 
-      <TitleBar />
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="bg-hacker-bg">
+          <TitleBar />
+          <TabNav />
+        </div>
 
-      <TabNav />
+        <main className="relative flex-1 overflow-hidden">
+          <ErrorBoundary>
+            <TabPanel visible={activeTab === "download"}><DownloadPage /></TabPanel>
+            <TabPanel visible={activeTab === "queue"}><QueuePage /></TabPanel>
+            <TabPanel visible={activeTab === "history"}><HistoryPage /></TabPanel>
+            <TabPanel visible={activeTab === "settings"}><SettingsPage /></TabPanel>
+            <TabPanel visible={activeTab === "about"}><AboutPage /></TabPanel>
+          </ErrorBoundary>
+        </main>
 
-      <main className="relative z-10 flex-1 overflow-hidden">
-        <ErrorBoundary>
-          {activeTab === "download" && <DownloadPage />}
-          {activeTab === "queue" && <QueuePage />}
-          {activeTab === "history" && <HistoryPage />}
-          {activeTab === "settings" && <SettingsPage />}
-          {activeTab === "about" && <AboutPage />}
-        </ErrorBoundary>
-      </main>
-
-      <StatusBar />
+        <div className="bg-hacker-bg">
+          <StatusBar />
+        </div>
+      </div>
 
       {settings?.crtEffect && <CRTOverlay />}
     </div>

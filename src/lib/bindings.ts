@@ -8,6 +8,7 @@ import type {
   Settings,
   HistoryEntry,
   CookiesBrowser,
+  DependencyStatus,
 } from "./types";
 
 export const api = {
@@ -61,12 +62,19 @@ export const api = {
     minimize: () => invoke<void>("window_minimize"),
 
     close: () => invoke<void>("window_close"),
+
+    isFullscreen: () => invoke<boolean>("window_is_fullscreen"),
+
+    setFullscreen: (fullscreen: boolean) =>
+      invoke<void>("window_set_fullscreen", { fullscreen }),
   },
 
   app: {
     getDownloadsPath: () => invoke<string>("get_downloads_path"),
 
     getVersion: () => invoke<string>("get_app_version"),
+
+    checkDependencies: () => invoke<DependencyStatus>("check_dependencies"),
   },
 
   clipboard: {

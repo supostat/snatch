@@ -27,6 +27,12 @@ pub fn build_download_args(
         .map(|s| s.to_string())
         .collect();
 
+    // Force MP4 container for video (WebView-compatible)
+    if !options.quality.is_audio_only() {
+        args.push("--merge-output-format".to_string());
+        args.push("mp4".to_string());
+    }
+
     let output_template = format!(
         "{}/%(title)s.%(ext)s",
         output_dir.as_path().display()

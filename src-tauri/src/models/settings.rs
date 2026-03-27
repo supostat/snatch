@@ -64,7 +64,7 @@ impl Default for Settings {
             default_quality: QualityPreset::default(),
             embed_thumbnail: true,
             embed_metadata: true,
-            auto_clipboard: true,
+            auto_clipboard: false,
             max_concurrent: default_max_concurrent(),
             theme: Theme::default(),
             show_matrix_rain: true,
@@ -105,7 +105,7 @@ mod tests {
         let settings: Settings = serde_json::from_str("{}").expect("deserialize");
         assert_eq!(settings.embed_thumbnail, true);
         assert_eq!(settings.embed_metadata, true);
-        assert_eq!(settings.auto_clipboard, true);
+        assert_eq!(settings.auto_clipboard, false);
         assert_eq!(settings.max_concurrent, 3);
         assert_eq!(settings.show_matrix_rain, true);
         assert_eq!(settings.crt_effect, true);
@@ -122,7 +122,7 @@ mod tests {
         assert_eq!(settings.embed_thumbnail, false);
         assert_eq!(settings.max_concurrent, 5);
         assert_eq!(settings.embed_metadata, true);
-        assert_eq!(settings.auto_clipboard, true);
+        assert_eq!(settings.auto_clipboard, false);
     }
 
     #[test]

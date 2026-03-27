@@ -13,6 +13,7 @@ const YTDLP_FLAGS_WHITELIST: &[&str] = &[
     "--embed-thumbnail",
     "--embed-metadata",
     "--cookies-from-browser",
+    "--merge-output-format",
     "--dump-json",
     "--no-playlist",
     "--playlist-items",

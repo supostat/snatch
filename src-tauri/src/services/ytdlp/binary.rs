@@ -26,6 +26,27 @@ fn resolve_from_dir(exe_dir: &Path) -> Result<PathBuf, AppError> {
         }
     }
 
+    // Dev mode only: fall back to PATH lookup
+    #[cfg(debug_assertions)]
+    if let Ok(path) = which("yt-dlp") {
+        return Ok(path);
+    }
+
+    Err(AppError::YtdlpNotFound)
+}
+
+#[cfg(debug_assertions)]
+fn which(binary_name: &str) -> Result<PathBuf, AppError> {
+    let path_var = std::env::var("PATH").map_err(|_| AppError::YtdlpNotFound)?;
+    let separator = if cfg!(windows) { ';' } else { ':' };
+
+    for dir in path_var.split(separator) {
+        let candidate = Path::new(dir).join(binary_name);
+        if candidate.is_file() {
+            return Ok(candidate);
+        }
+    }
+
     Err(AppError::YtdlpNotFound)
 }
 

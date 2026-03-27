@@ -34,6 +34,25 @@ impl YtdlpRunner {
         self.binary_path.as_deref().ok_or(AppError::YtdlpNotFound)
     }
 
+    pub fn is_available(&self) -> bool {
+        self.binary_path.is_some()
+    }
+
+    pub async fn get_version(&self) -> Result<String, AppError> {
+        let binary = self.binary_path()?;
+        let output = Command::new(binary)
+            .arg("--version")
+            .output()
+            .await
+            .map_err(|e| AppError::YtdlpFailed(format!("failed to get version: {e}")))?;
+
+        let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if version.is_empty() {
+            return Err(AppError::YtdlpFailed("empty version output".to_string()));
+        }
+        Ok(version)
+    }
+
     pub async fn get_info(
         &self,
         url: &ValidatedUrl,

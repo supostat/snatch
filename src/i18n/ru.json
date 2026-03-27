@@ -95,12 +95,25 @@
     "waitingForOutput": "Ожидание вывода...",
     "downloading": "загрузка"
   },
+  "player": {
+    "fullscreen": "Полный экран",
+    "unsupported": "Этот формат нельзя воспроизвести в приложении. Откройте во внешнем плеере.",
+    "openExternal": "Открыть в плеере",
+    "showInFolder": "Показать в папке"
+  },
+  "deps": {
+    "ytdlpMissing": "yt-dlp не найден",
+    "ytdlpInstallHint": "Установите yt-dlp для загрузки видео:"
+  },
   "about": {
     "version": "Версия",
     "engine": "Движок",
     "platform": "Платформа",
     "builtWith": "Создано с",
+    "authorLabel": "Автор",
+    "website": "Сайт",
     "links": "Ссылки",
+    "author": "byigor.dev",
     "sourceCode": "Исходный код",
     "ytdlpProject": "Проект yt-dlp"
   }

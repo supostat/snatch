@@ -17,6 +17,23 @@ pub async fn window_close(window: tauri::Window) -> Result<(), AppError> {
 }
 
 #[tauri::command]
+pub async fn window_is_fullscreen(window: tauri::Window) -> Result<bool, AppError> {
+    window
+        .is_fullscreen()
+        .map_err(|e| AppError::Window(format!("fullscreen check failed: {e}")))
+}
+
+#[tauri::command]
+pub async fn window_set_fullscreen(
+    fullscreen: bool,
+    window: tauri::Window,
+) -> Result<(), AppError> {
+    window
+        .set_fullscreen(fullscreen)
+        .map_err(|e| AppError::Window(format!("fullscreen failed: {e}")))
+}
+
+#[tauri::command]
 pub async fn get_downloads_path() -> Result<String, AppError> {
     dirs::download_dir()
         .map(|p| p.to_string_lossy().to_string())

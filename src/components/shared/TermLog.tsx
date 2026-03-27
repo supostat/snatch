@@ -24,7 +24,7 @@ export function TermLog({ lines, maxHeight = "200px" }: TermLogProps) {
       style={{ maxHeight }}
     >
       {lines.length === 0 ? (
-        <span className="text-hacker-text-dim opacity-50">
+        <span className="text-hacker-text-dim">
           {">"} {t("common.waitingForOutput")}
         </span>
       ) : (

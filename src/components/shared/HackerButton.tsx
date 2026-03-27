@@ -9,12 +9,12 @@ interface HackerButtonProps
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: `border-[var(--accent)] text-[var(--accent)]
+  primary: `bg-hacker-bg border-[var(--accent)] text-[var(--accent)]
     hover:bg-[var(--accent)] hover:text-hacker-bg
     hover:shadow-[0_0_12px_var(--accent-glow)]`,
-  ghost: `border-hacker-border text-hacker-text
+  ghost: `bg-hacker-bg border-hacker-border text-hacker-text
     hover:border-[var(--accent-dim)] hover:text-[var(--accent)]`,
-  danger: `border-hacker-red text-hacker-red
+  danger: `bg-hacker-bg border-hacker-red text-hacker-red
     hover:bg-hacker-red hover:text-hacker-bg
     hover:shadow-[0_0_12px_rgba(255,51,51,0.5)]`,
 };
@@ -30,9 +30,9 @@ export function HackerButton({
 
   return (
     <button
-      className={`border px-4 py-2 font-mono text-xs uppercase tracking-widest
+      className={`border px-4 py-2.5 font-mono text-xs uppercase tracking-widest
         transition-all duration-200 cursor-pointer
-        disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none
+        disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none
         ${variantStyles[variant]}`}
       disabled={isDisabled}
       {...props}
