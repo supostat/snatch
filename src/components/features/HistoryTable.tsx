@@ -1,14 +1,26 @@
+import { useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
 import type { HistoryEntry } from "../../lib/types";
-import { HackerButton } from "../shared/HackerButton";
+import { HistoryContextMenu } from "./HistoryContextMenu";
 
 type ViewMode = "grid" | "list";
 
 interface HistoryTableProps {
   entries: HistoryEntry[];
-  onRemove: (id: string) => void;
+  fileExistsMap: Map<string, boolean>;
+  selectedIds: Set<string>;
+  onToggleSelection: (id: string) => void;
   onPlay: (entry: HistoryEntry) => void;
+  onOpenExternal: (filePath: string) => void;
+  onShowInFolder: (filePath: string) => void;
+  onRemoveEntry: (id: string) => void;
+  onDeleteFile: (id: string) => void;
   viewMode: ViewMode;
+}
+
+interface ContextMenuState {
+  entry: HistoryEntry;
+  position: { x: number; y: number };
 }
 
 function formatDate(iso: string): string {
@@ -46,20 +58,43 @@ function formatDuration(seconds: number | null): string {
 
 function GridCard({
   entry,
-  onRemove,
+  fileExists,
+  isSelected,
+  onToggleSelection,
   onPlay,
+  onContextMenu,
 }: {
   entry: HistoryEntry;
-  onRemove: () => void;
+  fileExists: boolean;
+  isSelected: boolean;
+  onToggleSelection: () => void;
   onPlay: () => void;
+  onContextMenu: (event: React.MouseEvent) => void;
 }) {
   const { t } = useI18n();
 
   return (
-    <div className="group border border-hacker-border bg-hacker-surface hover:border-[var(--accent-dim)] transition-colors duration-200 flex flex-col">
+    <div
+      className={`group border bg-hacker-surface hover:border-[var(--accent-dim)] transition-colors duration-200 flex flex-col relative
+        ${isSelected ? "border-[var(--accent)]" : "border-hacker-border"}
+        ${!fileExists ? "opacity-50" : ""}`}
+      onContextMenu={onContextMenu}
+    >
+      {/* Selection checkbox */}
       <button
-        onClick={onPlay}
-        className="relative w-full aspect-video bg-hacker-bg overflow-hidden cursor-pointer"
+        onClick={onToggleSelection}
+        className={`absolute top-1 left-1 z-10 w-4 h-4 border font-mono text-[8px] flex items-center justify-center cursor-pointer transition-all duration-200
+          ${isSelected
+            ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]"
+            : "border-hacker-border bg-hacker-bg/80 text-transparent group-hover:border-hacker-text-dim"
+          }`}
+      >
+        {isSelected ? "✓" : ""}
+      </button>
+
+      <button
+        onClick={fileExists ? onPlay : undefined}
+        className={`relative w-full aspect-video bg-hacker-bg overflow-hidden ${fileExists ? "cursor-pointer" : "cursor-default"}`}
       >
         {entry.thumbnail ? (
           <img
@@ -77,11 +112,20 @@ function GridCard({
             {formatDuration(entry.duration)}
           </span>
         )}
-        <div className="absolute inset-0 bg-[var(--accent)]/0 group-hover:bg-[var(--accent)]/5 transition-colors duration-200 flex items-center justify-center">
-          <span className="opacity-0 group-hover:opacity-100 text-[var(--accent)] font-mono text-xs transition-opacity duration-200">
-            {"▶"} {t("history.play")}
-          </span>
-        </div>
+        {fileExists && (
+          <div className="absolute inset-0 bg-[var(--accent)]/0 group-hover:bg-[var(--accent)]/5 transition-colors duration-200 flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 text-[var(--accent)] font-mono text-xs transition-opacity duration-200">
+              {"▶"} {t("history.play")}
+            </span>
+          </div>
+        )}
+        {!fileExists && (
+          <div className="absolute inset-0 flex items-center justify-center bg-hacker-bg/60">
+            <span className="text-hacker-red font-mono text-[10px]">
+              {t("history.fileMissing")}
+            </span>
+          </div>
+        )}
       </button>
 
       <div className="p-2 flex-1 flex flex-col gap-1">
@@ -97,12 +141,6 @@ function GridCard({
             <span>{formatFileSize(entry.fileSize)}</span>
             <span>{formatDate(entry.downloadedAt)}</span>
           </div>
-          <button
-            onClick={onRemove}
-            className="text-hacker-text-dim hover:text-hacker-red font-mono text-[10px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
-          >
-            {"✕"}
-          </button>
         </div>
       </div>
     </div>
@@ -111,20 +149,43 @@ function GridCard({
 
 function ListRow({
   entry,
-  onRemove,
+  fileExists,
+  isSelected,
+  onToggleSelection,
   onPlay,
+  onContextMenu,
 }: {
   entry: HistoryEntry;
-  onRemove: () => void;
+  fileExists: boolean;
+  isSelected: boolean;
+  onToggleSelection: () => void;
   onPlay: () => void;
+  onContextMenu: (event: React.MouseEvent) => void;
 }) {
   const { t } = useI18n();
 
   return (
-    <div className="group flex items-center gap-3 border border-hacker-border bg-hacker-surface p-3 hover:border-[var(--accent-dim)] transition-colors duration-200">
+    <div
+      className={`group flex items-center gap-3 border bg-hacker-surface p-3 hover:border-[var(--accent-dim)] transition-colors duration-200
+        ${isSelected ? "border-[var(--accent)]" : "border-hacker-border"}
+        ${!fileExists ? "opacity-50" : ""}`}
+      onContextMenu={onContextMenu}
+    >
+      {/* Selection checkbox */}
       <button
-        onClick={onPlay}
-        className="relative w-28 aspect-video bg-hacker-bg overflow-hidden shrink-0 cursor-pointer"
+        onClick={onToggleSelection}
+        className={`w-4 h-4 border font-mono text-[8px] flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0
+          ${isSelected
+            ? "border-[var(--accent)] bg-[var(--accent)]/20 text-[var(--accent)]"
+            : "border-hacker-border bg-hacker-bg text-transparent group-hover:border-hacker-text-dim"
+          }`}
+      >
+        {isSelected ? "✓" : ""}
+      </button>
+
+      <button
+        onClick={fileExists ? onPlay : undefined}
+        className={`relative w-28 aspect-video bg-hacker-bg overflow-hidden shrink-0 ${fileExists ? "cursor-pointer" : "cursor-default"}`}
       >
         {entry.thumbnail ? (
           <img
@@ -142,6 +203,13 @@ function ListRow({
             {formatDuration(entry.duration)}
           </span>
         )}
+        {!fileExists && (
+          <div className="absolute inset-0 flex items-center justify-center bg-hacker-bg/60">
+            <span className="text-hacker-red font-mono text-[8px]">
+              {t("history.fileMissing")}
+            </span>
+          </div>
+        )}
       </button>
 
       <div className="flex-1 min-w-0">
@@ -155,21 +223,32 @@ function ListRow({
           <span>{formatDate(entry.downloadedAt)}</span>
         </div>
       </div>
-
-      <HackerButton variant="ghost" onClick={onRemove}>
-        {t("history.delete")}
-      </HackerButton>
     </div>
   );
 }
 
 export function HistoryTable({
   entries,
-  onRemove,
+  fileExistsMap,
+  selectedIds,
+  onToggleSelection,
   onPlay,
+  onOpenExternal,
+  onShowInFolder,
+  onRemoveEntry,
+  onDeleteFile,
   viewMode,
 }: HistoryTableProps) {
   const { t } = useI18n();
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+
+  function handleContextMenu(event: React.MouseEvent, entry: HistoryEntry) {
+    event.preventDefault();
+    setContextMenu({
+      entry,
+      position: { x: event.clientX, y: event.clientY },
+    });
+  }
 
   if (entries.length === 0) {
     return (
@@ -181,31 +260,50 @@ export function HistoryTable({
     );
   }
 
-  if (viewMode === "grid") {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-        {entries.map((entry) => (
-          <GridCard
-            key={entry.id}
-            entry={entry}
-            onRemove={() => onRemove(entry.id)}
-            onPlay={() => onPlay(entry)}
-          />
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-1">
-      {entries.map((entry) => (
-        <ListRow
-          key={entry.id}
-          entry={entry}
-          onRemove={() => onRemove(entry.id)}
-          onPlay={() => onPlay(entry)}
+    <>
+      {viewMode === "grid" ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {entries.map((entry) => (
+            <GridCard
+              key={entry.id}
+              entry={entry}
+              fileExists={fileExistsMap.get(entry.id) ?? true}
+              isSelected={selectedIds.has(entry.id)}
+              onToggleSelection={() => onToggleSelection(entry.id)}
+              onPlay={() => onPlay(entry)}
+              onContextMenu={(e) => handleContextMenu(e, entry)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-1">
+          {entries.map((entry) => (
+            <ListRow
+              key={entry.id}
+              entry={entry}
+              fileExists={fileExistsMap.get(entry.id) ?? true}
+              isSelected={selectedIds.has(entry.id)}
+              onToggleSelection={() => onToggleSelection(entry.id)}
+              onPlay={() => onPlay(entry)}
+              onContextMenu={(e) => handleContextMenu(e, entry)}
+            />
+          ))}
+        </div>
+      )}
+
+      {contextMenu && (
+        <HistoryContextMenu
+          position={contextMenu.position}
+          fileExists={fileExistsMap.get(contextMenu.entry.id) ?? true}
+          onPlay={() => onPlay(contextMenu.entry)}
+          onOpenExternal={() => onOpenExternal(contextMenu.entry.filePath)}
+          onShowInFolder={() => onShowInFolder(contextMenu.entry.filePath)}
+          onRemoveEntry={() => onRemoveEntry(contextMenu.entry.id)}
+          onDeleteFile={() => onDeleteFile(contextMenu.entry.id)}
+          onClose={() => setContextMenu(null)}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }

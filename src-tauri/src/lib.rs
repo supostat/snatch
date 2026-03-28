@@ -65,6 +65,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::download::yt_get_info,
+            commands::download::yt_get_playlist_info,
             commands::download::yt_download,
             commands::download::yt_cancel,
             commands::settings::settings_get_all,
@@ -78,6 +79,8 @@ pub fn run() {
             commands::dialog::open_path,
             commands::dialog::open_url,
             commands::dialog::show_in_folder,
+            commands::dialog::check_files_exist,
+            commands::dialog::delete_file,
             commands::window::window_minimize,
             commands::window::window_close,
             commands::window::window_is_fullscreen,

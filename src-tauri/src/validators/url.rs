@@ -36,6 +36,10 @@ impl ValidatedUrl {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    pub fn is_playlist(&self) -> bool {
+        self.0.contains("playlist?list=")
+    }
 }
 
 #[cfg(test)]

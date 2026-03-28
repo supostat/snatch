@@ -17,6 +17,8 @@ const YTDLP_FLAGS_WHITELIST: &[&str] = &[
     "--ffmpeg-location",
     "--dump-json",
     "--no-playlist",
+    "--yes-playlist",
+    "--flat-playlist",
     "--playlist-items",
     "--newline",
     "--progress-template",

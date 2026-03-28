@@ -50,11 +50,31 @@
     "searchPlaceholder": "Search history...",
     "clearAll": "CLEAR",
     "emptyState": "[ No entries ]",
-    "delete": "DEL",
+    "delete": "Delete",
     "noThumbnail": "No preview",
     "play": "Play",
     "gridView": "Grid view",
-    "listView": "List view"
+    "listView": "List view",
+    "filterLabel": "Filter:",
+    "sortLabel": "Sort:",
+    "allQualities": "All qualities",
+    "sortDate": "Date",
+    "sortTitle": "Title",
+    "sortSize": "Size",
+    "sortDuration": "Duration",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "selected": "Selected",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect",
+    "removeSelected": "Remove entries",
+    "deleteSelected": "Delete files",
+    "fileMissing": "File missing",
+    "contextPlay": "Play",
+    "contextOpenExternal": "Open in player",
+    "contextShowInFolder": "Show in folder",
+    "contextRemoveEntry": "Remove from history",
+    "contextDeleteFile": "Delete file"
   },
   "settings": {
     "loadingSettings": "Loading settings...",
@@ -119,6 +139,14 @@
       "done": "done",
       "error": "error"
     }
+  },
+  "playlist": {
+    "fetchingPlaylist": "Fetching playlist: ",
+    "videos": "videos",
+    "selected": "Selected",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "addToQueue": "Add to Queue"
   },
   "about": {
     "version": "Version",

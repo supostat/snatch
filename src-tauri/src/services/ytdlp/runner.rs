@@ -8,6 +8,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::error::AppError;
 use crate::models::download::{DownloadOptions, DownloadProgress, DownloadResult};
+use crate::models::playlist_info::PlaylistInfo;
 use crate::models::quality::{CookiesBrowser, DownloadStage};
 use crate::models::video_info::VideoInfo;
 use crate::validators::flags::validate_ytdlp_flags;
@@ -98,6 +99,38 @@ impl YtdlpRunner {
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         info::parse_video_info(&stdout)
+    }
+
+    pub async fn get_playlist_info(
+        &self,
+        url: &ValidatedUrl,
+        cookies_browser: &CookiesBrowser,
+    ) -> Result<PlaylistInfo, AppError> {
+        let binary = self.get_binary_path()?;
+        let args = formats::build_playlist_args(url, cookies_browser);
+
+        let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+        validate_ytdlp_flags(&args_refs)?;
+
+        let output = Command::new(binary)
+            .args(&args)
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .map_err(|e| AppError::YtdlpFailed(format!("failed to spawn yt-dlp: {e}")))?
+            .wait_with_output()
+            .await
+            .map_err(|e| AppError::YtdlpFailed(format!("yt-dlp process error: {e}")))?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(AppError::YtdlpFailed(
+                stderr.lines().last().unwrap_or("unknown error").to_string(),
+            ));
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        info::parse_playlist_info(&stdout)
     }
 
     #[allow(clippy::too_many_arguments)]

@@ -3,6 +3,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::error::AppError;
 use crate::models::download::{DownloadHandle, DownloadOptions, DownloadResult};
+use crate::models::playlist_info::PlaylistInfo;
 use crate::models::quality::CookiesBrowser;
 use crate::models::video_info::VideoInfo;
 use crate::validators::path::SafePath;
@@ -19,6 +20,19 @@ pub async fn yt_get_info(
     state
         .ytdlp_runner
         .get_info(&validated_url, &cookies_browser)
+        .await
+}
+
+#[tauri::command]
+pub async fn yt_get_playlist_info(
+    url: String,
+    cookies_browser: CookiesBrowser,
+    state: State<'_, AppState>,
+) -> Result<PlaylistInfo, AppError> {
+    let validated_url = ValidatedUrl::new(&url)?;
+    state
+        .ytdlp_runner
+        .get_playlist_info(&validated_url, &cookies_browser)
         .await
 }
 

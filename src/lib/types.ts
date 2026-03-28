@@ -113,6 +113,21 @@ export interface QueueItem {
   quality: QualityPreset;
 }
 
+export interface PlaylistEntry {
+  url: string;
+  title: string;
+  duration: number | null;
+  thumbnail: string | null;
+  channel: string | null;
+}
+
+export interface PlaylistInfo {
+  title: string;
+  channel: string;
+  videoCount: number;
+  entries: PlaylistEntry[];
+}
+
 export type TabId = "download" | "queue" | "history" | "settings" | "about";
 
 export interface DependencyStatus {

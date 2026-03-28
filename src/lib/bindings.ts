@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type {
   VideoInfo,
+  PlaylistInfo,
   DownloadOptions,
   DownloadResult,
   DownloadProgress,
@@ -16,6 +17,9 @@ export const api = {
   yt: {
     getInfo: (url: string, cookiesBrowser: CookiesBrowser) =>
       invoke<VideoInfo>("yt_get_info", { url, cookiesBrowser }),
+
+    getPlaylistInfo: (url: string, cookiesBrowser: CookiesBrowser) =>
+      invoke<PlaylistInfo>("yt_get_playlist_info", { url, cookiesBrowser }),
 
     download: (options: DownloadOptions) =>
       invoke<DownloadResult>("yt_download", { options }),
@@ -57,6 +61,12 @@ export const api = {
 
     showInFolder: (path: string) =>
       invoke<void>("show_in_folder", { path }),
+
+    checkFilesExist: (paths: string[]) =>
+      invoke<boolean[]>("check_files_exist", { paths }),
+
+    deleteFile: (path: string) =>
+      invoke<void>("delete_file", { path }),
   },
 
   window: {

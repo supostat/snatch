@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BatchQueue } from "../components/features/BatchQueue";
 import { QualityPicker } from "../components/features/QualityPicker";
 import { HackerButton } from "../components/shared/HackerButton";
 import { useI18n } from "../hooks/useI18n";
 import { useQueue } from "../hooks/useQueue";
 import type { QualityPreset, QueueItemStatus } from "../lib/types";
+import { useAppStore } from "../stores/app-store";
 
 function QueueStats({
   total,
@@ -53,6 +54,19 @@ export function QueuePage() {
   const [quality, setQuality] = useState<QualityPreset>("best");
   const queue = useQueue();
   const { t } = useI18n();
+  const activeTab = useAppStore((state) => state.activeTab);
+  const consumeQueueUrls = useAppStore((state) => state.consumeQueueUrls);
+
+  // Pick up playlist URLs sent from DownloadPage
+  useEffect(() => {
+    if (activeTab !== "queue") return;
+    const pending = consumeQueueUrls();
+    if (pending) {
+      setQuality(pending.quality);
+      queue.addUrls(pending.urls, pending.quality);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- addUrls is stable via useCallback, consumeQueueUrls clears state on read (no loop)
+  }, [activeTab]);
 
   function handleAddToQueue() {
     const lines = urlText.split("\n");

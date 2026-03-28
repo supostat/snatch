@@ -64,6 +64,29 @@ pub async fn show_in_folder(path: String, state: State<'_, AppState>) -> Result<
     result
 }
 
+#[tauri::command]
+pub async fn check_files_exist(paths: Vec<String>) -> Result<Vec<bool>, AppError> {
+    Ok(paths
+        .iter()
+        .map(|path| std::path::Path::new(path).exists())
+        .collect())
+}
+
+#[tauri::command]
+pub async fn delete_file(path: String, state: State<'_, AppState>) -> Result<(), AppError> {
+    let allowed_dirs = build_allowed_dirs();
+    let safe = SafePath::new(&path, &allowed_dirs)?;
+
+    std::fs::remove_file(safe.as_path())
+        .map_err(|e| AppError::Dialog(format!("failed to delete file: {e}")))?;
+
+    if let Ok(audit) = state.audit.lock() {
+        audit.log_event("delete_file", &path, "ok");
+    }
+
+    Ok(())
+}
+
 fn build_allowed_dirs() -> Vec<std::path::PathBuf> {
     let mut allowed = Vec::new();
     if let Some(download_dir) = dirs::download_dir() {

@@ -50,11 +50,31 @@
     "searchPlaceholder": "Поиск в истории...",
     "clearAll": "ОЧИСТИТЬ",
     "emptyState": "[ Нет записей ]",
-    "delete": "УД.",
+    "delete": "Удалить",
     "noThumbnail": "Нет превью",
     "play": "Воспр.",
     "gridView": "Сетка",
-    "listView": "Список"
+    "listView": "Список",
+    "filterLabel": "Фильтр:",
+    "sortLabel": "Сортировка:",
+    "allQualities": "Все качества",
+    "sortDate": "Дата",
+    "sortTitle": "Название",
+    "sortSize": "Размер",
+    "sortDuration": "Длительность",
+    "ascending": "По возрастанию",
+    "descending": "По убыванию",
+    "selected": "Выбрано",
+    "selectAll": "Выбрать все",
+    "deselectAll": "Снять выбор",
+    "removeSelected": "Убрать записи",
+    "deleteSelected": "Удалить файлы",
+    "fileMissing": "Файл не найден",
+    "contextPlay": "Воспроизвести",
+    "contextOpenExternal": "Открыть в плеере",
+    "contextShowInFolder": "Показать в папке",
+    "contextRemoveEntry": "Убрать из истории",
+    "contextDeleteFile": "Удалить файл"
   },
   "settings": {
     "loadingSettings": "Загрузка настроек...",
@@ -119,6 +139,14 @@
       "done": "готово",
       "error": "ошибка"
     }
+  },
+  "playlist": {
+    "fetchingPlaylist": "Загрузка плейлиста: ",
+    "videos": "видео",
+    "selected": "Выбрано",
+    "selectAll": "Выбрать все",
+    "deselectAll": "Снять выбор",
+    "addToQueue": "В очередь"
   },
   "about": {
     "version": "Версия",

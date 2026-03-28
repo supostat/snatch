@@ -12,6 +12,19 @@ pub fn build_info_args(url: &ValidatedUrl, cookies_browser: &CookiesBrowser) -> 
     args
 }
 
+pub fn build_playlist_args(url: &ValidatedUrl, cookies_browser: &CookiesBrowser) -> Vec<String> {
+    let mut args = vec![
+        "--flat-playlist".to_string(),
+        "--dump-json".to_string(),
+        "--yes-playlist".to_string(),
+    ];
+
+    append_cookies_args(&mut args, cookies_browser);
+
+    args.push(url.as_str().to_string());
+    args
+}
+
 pub fn build_download_args(
     url: &ValidatedUrl,
     options: &DownloadOptions,

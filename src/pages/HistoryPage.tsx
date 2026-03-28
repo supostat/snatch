@@ -3,12 +3,21 @@ import { HistoryTable } from "../components/features/HistoryTable";
 import { VideoPlayer } from "../components/features/VideoPlayer";
 import { HackerButton } from "../components/shared/HackerButton";
 import { HackerInput } from "../components/shared/HackerInput";
-import { useHistory } from "../hooks/useHistory";
+import { HackerSelect } from "../components/shared/HackerSelect";
+import { useHistory, type SortField } from "../hooks/useHistory";
 import { useI18n } from "../hooks/useI18n";
+import { getQualityPresets } from "../lib/constants";
 import type { HistoryEntry } from "../lib/types";
 import { useAppStore } from "../stores/app-store";
 
 type ViewMode = "grid" | "list";
+
+const SORT_OPTIONS: readonly { value: SortField; labelKey: string }[] = [
+  { value: "date", labelKey: "history.sortDate" },
+  { value: "title", labelKey: "history.sortTitle" },
+  { value: "size", labelKey: "history.sortSize" },
+  { value: "duration", labelKey: "history.sortDuration" },
+] as const;
 
 export function HistoryPage() {
   const history = useHistory();
@@ -23,12 +32,28 @@ export function HistoryPage() {
     }
   }, [activeTab, history.loadHistory]);
 
+  const qualityOptions = [
+    { value: "all", label: t("history.allQualities") },
+    ...getQualityPresets().map((preset) => ({
+      value: preset.value,
+      label: preset.label,
+    })),
+  ];
+
+  const sortOptions = SORT_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  }));
+
   function handlePlay(entry: HistoryEntry) {
     setPlayingEntry(entry);
   }
 
+  const hasSelection = history.selectedIds.size > 0;
+
   return (
-    <div className="flex flex-col gap-4 p-4 h-full overflow-y-auto">
+    <div className="flex flex-col gap-3 p-4 h-full overflow-y-auto">
+      {/* Search + View Toggle */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <HackerInput
@@ -62,14 +87,79 @@ export function HistoryPage() {
             {"☰"}
           </button>
         </div>
-
-        {history.entries.length > 0 && (
-          <HackerButton variant="danger" onClick={history.clearHistory}>
-            {t("history.clearAll")}
-          </HackerButton>
-        )}
       </div>
 
+      {/* Filter + Sort + Batch Controls */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <span className="text-hacker-text-dim font-mono text-[10px] uppercase tracking-widest shrink-0">
+            {t("history.filterLabel")}
+          </span>
+          <HackerSelect
+            value={history.qualityFilter}
+            options={qualityOptions}
+            onChange={history.setQualityFilter}
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-hacker-text-dim font-mono text-[10px] uppercase tracking-widest shrink-0">
+            {t("history.sortLabel")}
+          </span>
+          <HackerSelect
+            value={history.sortField}
+            options={sortOptions}
+            onChange={(v) => history.setSortField(v as SortField)}
+          />
+          <button
+            onClick={history.toggleSortDirection}
+            className="text-[var(--accent)] font-mono text-xs px-1.5 py-1 border border-hacker-border hover:border-[var(--accent-dim)] cursor-pointer transition-colors duration-200"
+            title={history.sortDirection === "asc" ? t("history.ascending") : t("history.descending")}
+          >
+            {history.sortDirection === "asc" ? "↑" : "↓"}
+          </button>
+        </div>
+
+        <div className="ml-auto flex items-center gap-3">
+          {/* Batch controls */}
+          {hasSelection && (
+            <>
+              <span className="text-[var(--accent)] font-mono text-[10px]">
+                {t("history.selected")}: {history.selectedIds.size}
+              </span>
+              <HackerButton variant="ghost" onClick={history.clearSelection}>
+                {t("history.deselectAll")}
+              </HackerButton>
+              <HackerButton variant="ghost" onClick={history.batchRemoveEntries}>
+                {t("history.removeSelected")}
+              </HackerButton>
+              <HackerButton variant="danger" onClick={history.batchDeleteFiles}>
+                {t("history.deleteSelected")}
+              </HackerButton>
+            </>
+          )}
+
+          {!hasSelection && (
+            <>
+              <span className="text-hacker-text-dim font-mono text-[10px]">
+                {history.resultCount}/{history.totalCount}
+              </span>
+              {history.totalCount > 0 && (
+                <>
+                  <HackerButton variant="ghost" onClick={history.selectAll}>
+                    {t("history.selectAll")}
+                  </HackerButton>
+                  <HackerButton variant="danger" onClick={history.clearHistory}>
+                    {t("history.clearAll")}
+                  </HackerButton>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Video Player */}
       {playingEntry && (
         <div className="border border-hacker-border bg-hacker-surface p-3">
           <div className="flex items-center justify-between mb-2">
@@ -87,10 +177,17 @@ export function HistoryPage() {
         </div>
       )}
 
+      {/* History Grid/List */}
       <HistoryTable
         entries={history.filteredEntries}
-        onRemove={history.removeEntry}
+        fileExistsMap={history.fileExistsMap}
+        selectedIds={history.selectedIds}
+        onToggleSelection={history.toggleSelection}
         onPlay={handlePlay}
+        onOpenExternal={history.openInPlayer}
+        onShowInFolder={history.showInFolder}
+        onRemoveEntry={history.removeEntry}
+        onDeleteFile={history.deleteFileAndEntry}
         viewMode={viewMode}
       />
     </div>

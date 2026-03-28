@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 use crate::error::AppError;
+use crate::models::playlist_info::{PlaylistEntry, PlaylistInfo};
 use crate::models::video_info::VideoInfo;
 
 /// Intermediate struct for parsing yt-dlp --dump-json output.
@@ -47,6 +48,90 @@ pub fn parse_video_info(json_output: &str) -> Result<VideoInfo, AppError> {
         view_count: raw.view_count,
         like_count: raw.like_count,
         description: raw.description,
+    })
+}
+
+/// Intermediate struct for parsing yt-dlp --flat-playlist --dump-json output.
+/// Each line is a JSON object representing one playlist entry.
+#[derive(Deserialize)]
+struct YtdlpPlaylistEntry {
+    #[serde(default)]
+    url: Option<String>,
+    #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
+    title: Option<String>,
+    #[serde(default)]
+    duration: Option<f64>,
+    #[serde(default)]
+    thumbnails: Option<Vec<YtdlpThumbnail>>,
+    #[serde(default)]
+    channel: Option<String>,
+    #[serde(default)]
+    uploader: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct YtdlpThumbnail {
+    #[serde(default)]
+    url: Option<String>,
+}
+
+/// Parse yt-dlp --flat-playlist output (one JSON per line, first line is playlist metadata)
+pub fn parse_playlist_info(json_lines: &str) -> Result<PlaylistInfo, AppError> {
+    let mut entries = Vec::new();
+    let mut playlist_title = String::from("Unknown Playlist");
+    let mut playlist_channel = String::from("Unknown Channel");
+
+    for line in json_lines.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        let raw: serde_json::Value = serde_json::from_str(trimmed)?;
+
+        // Playlist metadata has _type: "playlist"
+        if raw.get("_type").and_then(|v| v.as_str()) == Some("playlist") {
+            if let Some(title) = raw.get("title").and_then(|v| v.as_str()) {
+                playlist_title = title.to_string();
+            }
+            if let Some(channel) = raw
+                .get("channel")
+                .or_else(|| raw.get("uploader"))
+                .and_then(|v| v.as_str())
+            {
+                playlist_channel = channel.to_string();
+            }
+            continue;
+        }
+
+        // Individual video entries
+        if let Ok(entry) = serde_json::from_value::<YtdlpPlaylistEntry>(raw) {
+            let video_id = entry.id.unwrap_or_default();
+            let url = entry
+                .url
+                .unwrap_or_else(|| format!("https://www.youtube.com/watch?v={video_id}"));
+            let title = entry.title.unwrap_or_else(|| "Untitled".to_string());
+            let thumbnail = entry
+                .thumbnails
+                .and_then(|thumbs| thumbs.last().and_then(|t| t.url.clone()));
+
+            entries.push(PlaylistEntry {
+                url,
+                title,
+                duration: entry.duration.map(|d| d as u64),
+                thumbnail,
+                channel: entry.channel.or(entry.uploader),
+            });
+        }
+    }
+
+    Ok(PlaylistInfo {
+        title: playlist_title,
+        channel: playlist_channel,
+        video_count: entries.len(),
+        entries,
     })
 }
 
