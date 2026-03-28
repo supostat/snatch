@@ -34,6 +34,8 @@ pub fn build_download_args(
     let output_template = format!("{}/%(title)s.%(ext)s", output_dir.as_path().display());
     args.push("--output".to_string());
     args.push(output_template);
+    args.push("--compat-options".to_string());
+    args.push("filename-sanitization".to_string());
 
     if options.embed_thumbnail {
         args.push("--embed-thumbnail".to_string());
@@ -54,6 +56,9 @@ pub fn build_download_args(
 
     args.push("--newline".to_string());
     args.push("--no-playlist".to_string());
+    args.push("--windows-filenames".to_string());
+    args.push("--progress-template".to_string());
+    args.push("SNATCH|%(progress.downloaded_bytes|NA)s|%(progress.total_bytes|NA)s|%(progress.total_bytes_estimate|NA)s|%(progress.speed|NA)s|%(progress.eta|NA)s|%(progress.fragment_index|NA)s|%(progress.fragment_count|NA)s".to_string());
     args.push(url.as_str().to_string());
 
     args

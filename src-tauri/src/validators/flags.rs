@@ -20,11 +20,18 @@ const YTDLP_FLAGS_WHITELIST: &[&str] = &[
     "--playlist-items",
     "--newline",
     "--progress-template",
+    "--windows-filenames",
+    "--replace-in-metadata",
+    "--compat-options",
 ];
 
 pub fn validate_ytdlp_flags(flags: &[&str]) -> Result<(), AppError> {
     for flag in flags {
-        if flag.starts_with('-') && !YTDLP_FLAGS_WHITELIST.contains(flag) {
+        let is_flag = flag.starts_with("--")
+            || (flag.starts_with('-')
+                && flag.len() > 1
+                && flag.as_bytes()[1].is_ascii_alphabetic());
+        if is_flag && !YTDLP_FLAGS_WHITELIST.contains(flag) {
             return Err(AppError::YtdlpFailed(format!(
                 "forbidden yt-dlp flag: {flag}"
             )));

@@ -94,12 +94,21 @@ export interface HistoryEntry {
 
 export type QueueItemStatus = "pending" | "fetching" | "downloading" | "done" | "error" | "cancelled";
 
+export interface QueueItemProgressStage {
+  label: string;
+  percent: number;
+  speed: string | null;
+  eta: string | null;
+  completed: boolean;
+}
+
 export interface QueueItem {
   id: string;
   url: string;
   status: QueueItemStatus;
   videoInfo: VideoInfo | null;
   progress: DownloadProgress | null;
+  progressStages: QueueItemProgressStage[];
   error: string | null;
   quality: QualityPreset;
 }

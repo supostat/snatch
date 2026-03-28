@@ -5,7 +5,7 @@ import { QualityPicker } from "../components/features/QualityPicker";
 import { UrlInput } from "../components/features/UrlInput";
 import { VideoPlayer } from "../components/features/VideoPlayer";
 import { VideoPreview } from "../components/features/VideoPreview";
-import { RetroProgress } from "../components/shared/RetroProgress";
+import { MultiProgress } from "../components/shared/RetroProgress";
 import { TermLog } from "../components/shared/TermLog";
 import { useClipboard } from "../hooks/useClipboard";
 import { useDownload } from "../hooks/useDownload";
@@ -90,13 +90,8 @@ export function DownloadPage() {
         </div>
       )}
 
-      {download.isDownloading && download.progress && (
-        <RetroProgress
-          percent={download.progress.percent}
-          speed={download.progress.speed}
-          eta={download.progress.eta}
-          stage={download.progress.stage}
-        />
+      {download.isDownloading && download.progressStages.length > 0 && (
+        <MultiProgress stages={download.progressStages} />
       )}
 
       {download.result?.success && download.result.filePath && (

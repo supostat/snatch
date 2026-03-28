@@ -10,9 +10,17 @@ import type {
 } from "../lib/types";
 import { useAppStore } from "../stores/app-store";
 
+export interface ProgressStage {
+  label: string;
+  percent: number;
+  speed: string | null;
+  eta: string | null;
+  completed: boolean;
+}
+
 interface UseDownloadReturn {
   videoInfo: VideoInfo | null;
-  progress: DownloadProgress | null;
+  progressStages: ProgressStage[];
   result: DownloadResult | null;
   error: string | null;
   isLoadingInfo: boolean;
@@ -25,9 +33,16 @@ interface UseDownloadReturn {
   reset: () => void;
 }
 
+function buildStageLabel(event: DownloadProgress): string {
+  if (event.stage === "merging") return "Merge";
+  if (event.stage === "converting") return "Convert";
+  if (event.stage === "done") return "Done";
+  return event.pass ?? "Download";
+}
+
 export function useDownload(): UseDownloadReturn {
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
-  const [progress, setProgress] = useState<DownloadProgress | null>(null);
+  const [progressStages, setProgressStages] = useState<ProgressStage[]>([]);
   const [result, setResult] = useState<DownloadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
@@ -36,17 +51,49 @@ export function useDownload(): UseDownloadReturn {
 
   const downloadIdRef = useRef<string | null>(null);
   const videoInfoRef = useRef<VideoInfo | null>(null);
+  const lastLabelRef = useRef<string>("");
   const settings = useAppStore((state) => state.settings);
   const setDownloadActive = useAppStore((state) => state.setDownloadActive);
 
   useEffect(() => {
-    const unlistenPromise = api.yt.onProgress((progressEvent) => {
-      if (
-        downloadIdRef.current &&
-        progressEvent.downloadId === downloadIdRef.current
-      ) {
-        setProgress(progressEvent);
-      }
+    const unlistenPromise = api.yt.onProgress((event) => {
+      if (!downloadIdRef.current || event.downloadId !== downloadIdRef.current) return;
+
+      const label = buildStageLabel(event);
+      const isNewStage = label !== lastLabelRef.current;
+
+      setProgressStages((previous) => {
+        if (isNewStage && lastLabelRef.current !== "") {
+          // Mark previous stage as completed, add new current
+          const completed = previous.map((stage) =>
+            stage.completed ? stage : { ...stage, percent: 100, speed: null, eta: null, completed: true },
+          );
+          lastLabelRef.current = label;
+          return [
+            ...completed,
+            { label, percent: event.percent, speed: event.speed, eta: event.eta, completed: event.stage === "done" },
+          ];
+        }
+
+        if (lastLabelRef.current === "") {
+          lastLabelRef.current = label;
+        }
+
+        // Update current (last) stage
+        if (previous.length === 0) {
+          return [{ label, percent: event.percent, speed: event.speed, eta: event.eta, completed: event.stage === "done" }];
+        }
+
+        const updated = [...previous];
+        updated[updated.length - 1] = {
+          label,
+          percent: event.percent,
+          speed: event.speed,
+          eta: event.eta,
+          completed: event.stage === "done",
+        };
+        return updated;
+      });
     });
 
     return () => {
@@ -59,7 +106,8 @@ export function useDownload(): UseDownloadReturn {
       setError(null);
       setVideoInfo(null);
       setResult(null);
-      setProgress(null);
+      setProgressStages([]);
+      lastLabelRef.current = "";
       setIsLoadingInfo(true);
 
       try {
@@ -84,7 +132,8 @@ export function useDownload(): UseDownloadReturn {
     async (url: string, quality: QualityPreset) => {
       setError(null);
       setResult(null);
-      setProgress(null);
+      setProgressStages([]);
+      lastLabelRef.current = "";
       setIsDownloading(true);
       setDownloadActive(true);
 
@@ -149,7 +198,8 @@ export function useDownload(): UseDownloadReturn {
   const reset = useCallback(() => {
     setVideoInfo(null);
     videoInfoRef.current = null;
-    setProgress(null);
+    setProgressStages([]);
+    lastLabelRef.current = "";
     setResult(null);
     setError(null);
     setIsLoadingInfo(false);
@@ -160,7 +210,7 @@ export function useDownload(): UseDownloadReturn {
 
   return {
     videoInfo,
-    progress,
+    progressStages,
     result,
     error,
     isLoadingInfo,

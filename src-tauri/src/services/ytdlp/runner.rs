@@ -114,6 +114,8 @@ impl YtdlpRunner {
         let binary = self.get_binary_path()?;
         let args = formats::build_download_args(url, options, output_dir, ffmpeg_location);
 
+        tracing::info!(binary = %binary.display(), args = ?args, "spawning yt-dlp download");
+
         let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
         validate_ytdlp_flags(&args_refs)?;
 
@@ -133,43 +135,67 @@ impl YtdlpRunner {
         let mut last_emit = Instant::now();
         let mut last_file_path: Option<String> = None;
         let mut current_stage = DownloadStage::Downloading;
+        let is_video = !options.quality.is_audio_only();
+        let mut download_pass: u8 = 0;
+        let total_passes: u8 = if is_video { 2 } else { 1 };
+        let mut pass_max_percent: f64 = 0.0;
+        let mut using_template = false;
 
         loop {
             tokio::select! {
                 line_result = reader.next_line() => {
                     match line_result {
                         Ok(Some(line)) => {
-                            if let Some(update) = progress::parse_progress_line(&line) {
+                            // Once we receive a template line, ignore legacy [download] progress
+                            if line.starts_with("SNATCH|") {
+                                using_template = true;
+                            }
+                            if let Some(update) = progress::parse_progress_line_ex(&line, using_template) {
                                 match &update {
-                                    ProgressUpdate::Download { percent, total, speed, eta } => {
+                                    ProgressUpdate::Download { percent, speed, eta, total } => {
                                         if last_emit.elapsed().as_millis() >= PROGRESS_THROTTLE_MS {
+                                            if *percent > pass_max_percent {
+                                                pass_max_percent = *percent;
+                                            }
+                                            let pass_label = make_pass_label(download_pass, total_passes);
                                             let _ = app_handle.emit("yt:progress", &make_progress(
-                                                &download_id, *percent, &current_stage, speed.clone(), eta.clone(), total.clone(),
+                                                &download_id, pass_max_percent, &current_stage, speed.clone(), eta.clone(), total.clone(), pass_label,
                                             ));
                                             last_emit = Instant::now();
                                         }
                                     }
                                     ProgressUpdate::DownloadDone { .. } => {
+                                        let pass_label = make_pass_label(download_pass, total_passes);
                                         let _ = app_handle.emit("yt:progress", &make_progress(
-                                            &download_id, 100.0, &current_stage, None, None, None,
+                                            &download_id, 100.0, &current_stage, None, None, None, pass_label,
                                         ));
+                                        download_pass += 1;
+                                        pass_max_percent = 0.0;
                                     }
                                     ProgressUpdate::Merge { file_path } => {
                                         current_stage = DownloadStage::Merging;
                                         last_file_path = Some(file_path.clone());
                                         let _ = app_handle.emit("yt:progress", &make_progress(
-                                            &download_id, 100.0, &current_stage, None, None, None,
+                                            &download_id, 100.0, &current_stage, None, None, None, None,
                                         ));
                                     }
                                     ProgressUpdate::ExtractAudio { file_path } => {
                                         current_stage = DownloadStage::Converting;
                                         last_file_path = Some(file_path.clone());
                                         let _ = app_handle.emit("yt:progress", &make_progress(
-                                            &download_id, 100.0, &current_stage, None, None, None,
+                                            &download_id, 100.0, &current_stage, None, None, None, None,
                                         ));
                                     }
-                                    ProgressUpdate::Destination { file_path }
-                                    | ProgressUpdate::AlreadyDownloaded { file_path } => {
+                                    ProgressUpdate::Destination { file_path } => {
+                                        // Each new Destination = new download pass
+                                        // First Destination is pass 0 (already set), subsequent ones increment
+                                        if last_file_path.is_some() {
+                                            download_pass += 1;
+                                            pass_max_percent = 0.0;
+                                        }
+                                        last_file_path = Some(file_path.clone());
+                                    }
+                                    ProgressUpdate::AlreadyDownloaded { file_path } => {
                                         last_file_path = Some(file_path.clone());
                                     }
                                 }
@@ -199,6 +225,7 @@ impl YtdlpRunner {
                 let mut stderr_buf = String::new();
                 let _ = tokio::io::AsyncReadExt::read_to_string(&mut stderr, &mut stderr_buf).await;
                 if !stderr_buf.is_empty() {
+                    tracing::error!(stderr = %stderr_buf, "yt-dlp failed");
                     let last_line = stderr_buf.lines().last().unwrap_or("unknown error");
                     return Err(AppError::YtdlpFailed(last_line.to_string()));
                 }
@@ -210,7 +237,15 @@ impl YtdlpRunner {
 
         let _ = app_handle.emit(
             "yt:progress",
-            &make_progress(&download_id, 100.0, &DownloadStage::Done, None, None, None),
+            &make_progress(
+                &download_id,
+                100.0,
+                &DownloadStage::Done,
+                None,
+                None,
+                None,
+                None,
+            ),
         );
 
         let file_size = last_file_path
@@ -258,6 +293,14 @@ impl YtdlpRunner {
     }
 }
 
+fn make_pass_label(current_pass: u8, total_passes: u8) -> Option<String> {
+    if total_passes <= 1 {
+        return None;
+    }
+    let label = if current_pass == 0 { "Video" } else { "Audio" };
+    Some(format!("{}/{} {}", current_pass + 1, total_passes, label))
+}
+
 fn make_progress(
     download_id: &str,
     percent: f64,
@@ -265,6 +308,7 @@ fn make_progress(
     speed: Option<String>,
     eta: Option<String>,
     total: Option<String>,
+    pass: Option<String>,
 ) -> DownloadProgress {
     DownloadProgress {
         download_id: download_id.to_string(),
@@ -274,7 +318,7 @@ fn make_progress(
         downloaded: None,
         total,
         stage: stage.clone(),
-        pass: None,
+        pass,
     }
 }
 
@@ -318,6 +362,7 @@ mod tests {
             Some("1MiB/s".into()),
             None,
             None,
+            Some("1/2 Video".into()),
         );
         assert_eq!(payload.download_id, "test-id");
         assert!((payload.percent - 50.0).abs() < f64::EPSILON);

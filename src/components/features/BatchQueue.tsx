@@ -1,7 +1,7 @@
 import { useI18n } from "../../hooks/useI18n";
 import type { QueueItem, QueueItemStatus } from "../../lib/types";
 import { HackerButton } from "../shared/HackerButton";
-import { RetroProgress } from "../shared/RetroProgress";
+import { MultiProgress } from "../shared/RetroProgress";
 
 interface BatchQueueProps {
   items: QueueItem[];
@@ -45,7 +45,7 @@ function QueueItemRow({
 }) {
   const { t } = useI18n();
   const title = item.videoInfo?.title ?? item.url;
-  const showProgress = item.status === "downloading" && item.progress;
+  const showProgress = item.status === "downloading" && item.progressStages.length > 0;
 
   return (
     <div className="border border-hacker-border bg-hacker-surface p-3 space-y-2">
@@ -77,13 +77,8 @@ function QueueItemRow({
         </div>
       </div>
 
-      {showProgress && item.progress && (
-        <RetroProgress
-          percent={item.progress.percent}
-          speed={item.progress.speed}
-          eta={item.progress.eta}
-          stage={item.progress.stage}
-        />
+      {showProgress && (
+        <MultiProgress stages={item.progressStages} />
       )}
 
       {item.status === "error" && item.error && (

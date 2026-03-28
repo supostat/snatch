@@ -5,6 +5,7 @@ use super::quality::{CookiesBrowser, DownloadStage, QualityPreset};
 
 pub struct DownloadHandle {
     pub cancel_token: CancellationToken,
+    pub url: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

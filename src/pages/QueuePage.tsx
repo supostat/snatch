@@ -55,8 +55,21 @@ export function QueuePage() {
   const { t } = useI18n();
 
   function handleAddToQueue() {
-    const urls = urlText.split("\n");
-    queue.addUrls(urls, quality);
+    const lines = urlText.split("\n");
+    const validUrls = lines
+      .map((line) => line.trim())
+      .filter((line) => {
+        try {
+          const url = new URL(line);
+          return url.protocol === "https:" || url.protocol === "http:";
+        } catch {
+          return false;
+        }
+      });
+
+    if (validUrls.length === 0) return;
+
+    queue.addUrls(validUrls, quality);
     setUrlText("");
   }
 

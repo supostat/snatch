@@ -47,10 +47,19 @@ pub async fn yt_download(
             .active_downloads
             .lock()
             .map_err(|_| AppError::YtdlpFailed("internal lock error".to_string()))?;
+
+        let already_downloading = downloads.values().any(|handle| handle.url == options.url);
+        if already_downloading {
+            return Err(AppError::YtdlpFailed(
+                "this URL is already being downloaded".to_string(),
+            ));
+        }
+
         downloads.insert(
             download_id.clone(),
             DownloadHandle {
                 cancel_token: cancel_token.clone(),
+                url: options.url.clone(),
             },
         );
     }
