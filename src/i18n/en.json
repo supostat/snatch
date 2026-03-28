@@ -50,7 +50,11 @@
     "searchPlaceholder": "Search history...",
     "clearAll": "CLEAR",
     "emptyState": "[ No entries ]",
-    "delete": "DEL"
+    "delete": "DEL",
+    "noThumbnail": "No preview",
+    "play": "Play",
+    "gridView": "Grid view",
+    "listView": "List view"
   },
   "settings": {
     "loadingSettings": "Loading settings...",

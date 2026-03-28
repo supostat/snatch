@@ -50,7 +50,11 @@
     "searchPlaceholder": "Поиск в истории...",
     "clearAll": "ОЧИСТИТЬ",
     "emptyState": "[ Нет записей ]",
-    "delete": "УД."
+    "delete": "УД.",
+    "noThumbnail": "Нет превью",
+    "play": "Воспр.",
+    "gridView": "Сетка",
+    "listView": "Список"
   },
   "settings": {
     "loadingSettings": "Загрузка настроек...",
