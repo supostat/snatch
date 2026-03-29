@@ -84,6 +84,28 @@ export function SettingsPanel({ settings, onUpdate }: SettingsPanelProps) {
           checked={settings.embedMetadata}
           onChange={(v) => onUpdate("embedMetadata", v)}
         />
+
+        <SettingRow label={t("settings.speedLimit")}>
+          <div className="flex items-center gap-2">
+            {[0, 512, 1024, 2048, 5120, 10240].map((limit) => (
+              <button
+                key={limit}
+                onClick={() => onUpdate("speedLimit", limit)}
+                className={`px-2 py-1 font-mono text-[10px] border transition-all duration-200 cursor-pointer
+                  ${settings.speedLimit === limit
+                    ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10"
+                    : "border-hacker-border text-hacker-text-dim hover:border-hacker-text"
+                  }`}
+              >
+                {limit === 0
+                  ? t("settings.speedUnlimited")
+                  : limit >= 1024
+                    ? `${limit / 1024} MB/s`
+                    : `${limit} KB/s`}
+              </button>
+            ))}
+          </div>
+        </SettingRow>
       </HackerCard>
 
       <HackerCard>

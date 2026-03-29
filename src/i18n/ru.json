@@ -89,6 +89,8 @@
     "matrixRainEffect": "Эффект матричного дождя",
     "crtScanlineEffect": "Эффект CRT развёртки",
     "maxConcurrentDownloads": "Макс. параллельных загрузок",
+    "speedLimit": "Ограничение скорости",
+    "speedUnlimited": "Без ограничений",
     "autoPasteClipboard": "Автовставка из буфера обмена",
     "language": "Язык",
     "browserCookies": "Cookies браузера",

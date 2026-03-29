@@ -45,6 +45,7 @@ export interface DownloadOptions {
   embedThumbnail: boolean;
   embedMetadata: boolean;
   cookiesBrowser: CookiesBrowser;
+  speedLimit: number;
 }
 
 export interface DownloadProgress {
@@ -78,6 +79,7 @@ export interface Settings {
   crtEffect: boolean;
   locale: Locale;
   cookiesBrowser: CookiesBrowser;
+  speedLimit: number;
 }
 
 export interface HistoryEntry {

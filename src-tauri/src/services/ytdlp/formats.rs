@@ -60,6 +60,11 @@ pub fn build_download_args(
 
     append_cookies_args(&mut args, &options.cookies_browser);
 
+    if options.speed_limit > 0 {
+        args.push("--limit-rate".to_string());
+        args.push(format!("{}K", options.speed_limit));
+    }
+
     if let Some(ffmpeg_path) = ffmpeg_location {
         if let Some(parent) = ffmpeg_path.parent() {
             args.push("--ffmpeg-location".to_string());
@@ -115,6 +120,7 @@ mod tests {
             embed_thumbnail: false,
             embed_metadata: false,
             cookies_browser: CookiesBrowser::None,
+            speed_limit: 0,
         }
     }
 
@@ -209,6 +215,26 @@ mod tests {
             assert!(!args.is_empty());
             assert_eq!(args.last().unwrap(), url.as_str());
         }
+    }
+
+    #[test]
+    fn download_args_with_speed_limit() {
+        let url = test_url();
+        let mut options = test_options(QualityPreset::Best);
+        options.speed_limit = 1024;
+        let output_dir = test_safe_path();
+        let args = build_download_args(&url, &options, &output_dir, None);
+        assert!(args.contains(&"--limit-rate".to_string()));
+        assert!(args.contains(&"1024K".to_string()));
+    }
+
+    #[test]
+    fn download_args_no_speed_limit_when_zero() {
+        let url = test_url();
+        let options = test_options(QualityPreset::Best);
+        let output_dir = test_safe_path();
+        let args = build_download_args(&url, &options, &output_dir, None);
+        assert!(!args.contains(&"--limit-rate".to_string()));
     }
 
     #[test]

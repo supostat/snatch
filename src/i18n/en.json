@@ -89,6 +89,8 @@
     "matrixRainEffect": "Matrix rain effect",
     "crtScanlineEffect": "CRT scanline effect",
     "maxConcurrentDownloads": "Max concurrent downloads",
+    "speedLimit": "Download speed limit",
+    "speedUnlimited": "Unlimited",
     "autoPasteClipboard": "Auto-paste from clipboard",
     "language": "Language",
     "browserCookies": "Browser cookies",

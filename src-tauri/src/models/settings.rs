@@ -55,6 +55,9 @@ pub struct Settings {
 
     #[serde(default)]
     pub cookies_browser: CookiesBrowser,
+
+    #[serde(default)]
+    pub speed_limit: u32,
 }
 
 impl Default for Settings {
@@ -71,6 +74,7 @@ impl Default for Settings {
             crt_effect: true,
             locale: Locale::default(),
             cookies_browser: CookiesBrowser::default(),
+            speed_limit: 0,
         }
     }
 }

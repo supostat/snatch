@@ -161,6 +161,7 @@ export function useDownload(): UseDownloadReturn {
           embedThumbnail: settings?.embedThumbnail ?? true,
           embedMetadata: settings?.embedMetadata ?? true,
           cookiesBrowser: settings?.cookiesBrowser ?? "none",
+          speedLimit: settings?.speedLimit ?? 0,
         });
 
         setResult(downloadResult);

@@ -18,6 +18,8 @@ pub struct DownloadOptions {
     pub embed_thumbnail: bool,
     pub embed_metadata: bool,
     pub cookies_browser: CookiesBrowser,
+    #[serde(default)]
+    pub speed_limit: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,6 +59,7 @@ mod tests {
             embed_thumbnail: true,
             embed_metadata: true,
             cookies_browser: CookiesBrowser::None,
+            speed_limit: 0,
         };
 
         let json = serde_json::to_string(&options).expect("serialize");

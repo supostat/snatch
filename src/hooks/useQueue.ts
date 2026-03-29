@@ -45,6 +45,7 @@ interface ProcessItemDeps {
   embedThumbnail: boolean;
   embedMetadata: boolean;
   cookiesBrowser: CookiesBrowser;
+  speedLimit: number;
 }
 
 async function processItem(
@@ -81,6 +82,7 @@ async function processItem(
       embedThumbnail: settings.embedThumbnail,
       embedMetadata: settings.embedMetadata,
       cookiesBrowser: settings.cookiesBrowser,
+      speedLimit: settings.speedLimit,
     });
 
     downloadIdMap.current.delete(downloadId);
@@ -172,6 +174,7 @@ export function useQueue(): UseQueueReturn {
         embedThumbnail: settings?.embedThumbnail ?? true,
         embedMetadata: settings?.embedMetadata ?? true,
         cookiesBrowser: settings?.cookiesBrowser ?? "none" as CookiesBrowser,
+        speedLimit: settings?.speedLimit ?? 0,
       };
       processItem(item.id, itemsRef, setItems, downloadIdMap, resolvedSettings, advanceQueue);
     }
@@ -278,6 +281,7 @@ export function useQueue(): UseQueueReturn {
           embedThumbnail: settings?.embedThumbnail ?? true,
           embedMetadata: settings?.embedMetadata ?? true,
           cookiesBrowser: settings?.cookiesBrowser ?? "none" as CookiesBrowser,
+          speedLimit: settings?.speedLimit ?? 0,
         };
         processItem(item.id, itemsRef, setItems, downloadIdMap, resolvedSettings, advanceQueue);
       }
@@ -336,6 +340,7 @@ export function useQueue(): UseQueueReturn {
         embedThumbnail: settings?.embedThumbnail ?? true,
         embedMetadata: settings?.embedMetadata ?? true,
         cookiesBrowser: settings?.cookiesBrowser ?? "none" as CookiesBrowser,
+        speedLimit: settings?.speedLimit ?? 0,
       };
 
       const activeCount = countActive(itemsRef.current);
