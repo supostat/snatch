@@ -14,6 +14,15 @@ pub async fn history_get_all(state: State<'_, AppState>) -> Result<Vec<HistoryEn
 }
 
 #[tauri::command]
+pub async fn history_get_video_ids(state: State<'_, AppState>) -> Result<Vec<String>, AppError> {
+    let service = state
+        .history
+        .read()
+        .map_err(|_| AppError::History("internal lock error".to_string()))?;
+    Ok(service.get_video_ids())
+}
+
+#[tauri::command]
 pub async fn history_add(entry: HistoryEntry, state: State<'_, AppState>) -> Result<(), AppError> {
     let mut service = state
         .history

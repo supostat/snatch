@@ -75,7 +75,10 @@ export function QueuePage() {
       .filter((line) => {
         try {
           const url = new URL(line);
-          return url.protocol === "https:" || url.protocol === "http:";
+          return (
+            (url.protocol === "https:" || url.protocol === "http:") &&
+            !line.includes("playlist?list=")
+          );
         } catch {
           return false;
         }

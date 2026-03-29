@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../lib/bindings";
 import type { HistoryEntry } from "../lib/types";
+import { useAppStore } from "../stores/app-store";
 
 export type SortField = "date" | "title" | "size" | "duration";
 export type SortDirection = "asc" | "desc";
@@ -63,6 +64,15 @@ export function useHistory(): UseHistoryReturn {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const checkingFiles = useRef(false);
 
+  const refreshHistoryIndex = useCallback(async () => {
+    try {
+      const videoIds = await api.history.getVideoIds();
+      useAppStore.getState().setHistoryVideoIds(new Set(videoIds));
+    } catch {
+      // Index stays stale on error
+    }
+  }, []);
+
   const loadHistory = useCallback(async () => {
     try {
       const history = await api.history.getAll();
@@ -109,11 +119,12 @@ export function useHistory(): UseHistoryReturn {
           return next;
         });
         await loadHistory();
+        await refreshHistoryIndex();
       } catch {
         // Silently fail
       }
     },
-    [loadHistory],
+    [loadHistory, refreshHistoryIndex],
   );
 
   const deleteFileAndEntry = useCallback(
@@ -142,7 +153,8 @@ export function useHistory(): UseHistoryReturn {
     }
     setSelectedIds(new Set());
     await loadHistory();
-  }, [selectedIds, loadHistory]);
+    await refreshHistoryIndex();
+  }, [selectedIds, loadHistory, refreshHistoryIndex]);
 
   const batchDeleteFiles = useCallback(async () => {
     for (const id of selectedIds) {
@@ -157,17 +169,19 @@ export function useHistory(): UseHistoryReturn {
     }
     setSelectedIds(new Set());
     await loadHistory();
-  }, [selectedIds, entries, loadHistory]);
+    await refreshHistoryIndex();
+  }, [selectedIds, entries, loadHistory, refreshHistoryIndex]);
 
   const clearHistory = useCallback(async () => {
     try {
       await api.history.clear();
       setSelectedIds(new Set());
       await loadHistory();
+      await refreshHistoryIndex();
     } catch {
       // Silently fail
     }
-  }, [loadHistory]);
+  }, [loadHistory, refreshHistoryIndex]);
 
   const openInPlayer = useCallback(async (filePath: string) => {
     try {

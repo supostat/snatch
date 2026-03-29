@@ -72,6 +72,7 @@ pub fn run() {
             commands::settings::settings_get,
             commands::settings::settings_set,
             commands::history::history_get_all,
+            commands::history::history_get_video_ids,
             commands::history::history_add,
             commands::history::history_remove,
             commands::history::history_clear,

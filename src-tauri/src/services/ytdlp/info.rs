@@ -9,6 +9,8 @@ use crate::models::video_info::VideoInfo;
 #[derive(Deserialize)]
 struct YtdlpJsonOutput {
     #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
     title: Option<String>,
     #[serde(default)]
     thumbnail: Option<String>,
@@ -31,6 +33,7 @@ struct YtdlpJsonOutput {
 pub fn parse_video_info(json_output: &str) -> Result<VideoInfo, AppError> {
     let raw: YtdlpJsonOutput = serde_json::from_str(json_output)?;
 
+    let video_id = raw.id.unwrap_or_default();
     let title = raw.title.unwrap_or_else(|| "Unknown Title".to_string());
     let channel = raw
         .channel
@@ -40,6 +43,7 @@ pub fn parse_video_info(json_output: &str) -> Result<VideoInfo, AppError> {
     let upload_date = raw.upload_date.and_then(|d| format_upload_date(&d));
 
     Ok(VideoInfo {
+        video_id,
         title,
         thumbnail: raw.thumbnail,
         duration,
@@ -118,6 +122,7 @@ pub fn parse_playlist_info(json_lines: &str) -> Result<PlaylistInfo, AppError> {
                 .and_then(|thumbs| thumbs.last().and_then(|t| t.url.clone()));
 
             entries.push(PlaylistEntry {
+                video_id: video_id.clone(),
                 url,
                 title,
                 duration: entry.duration.map(|d| d as u64),
@@ -150,6 +155,7 @@ mod tests {
     #[test]
     fn parse_full_video_info() {
         let json = r#"{
+            "id": "dQw4w9WgXcQ",
             "title": "Never Gonna Give You Up",
             "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg",
             "duration": 212.5,
@@ -161,6 +167,7 @@ mod tests {
         }"#;
 
         let info = parse_video_info(json).unwrap();
+        assert_eq!(info.video_id, "dQw4w9WgXcQ");
         assert_eq!(info.title, "Never Gonna Give You Up");
         assert_eq!(info.channel, "Rick Astley");
         assert_eq!(info.duration, 212);
@@ -173,6 +180,7 @@ mod tests {
     fn parse_minimal_json_uses_defaults() {
         let json = r#"{}"#;
         let info = parse_video_info(json).unwrap();
+        assert_eq!(info.video_id, "");
         assert_eq!(info.title, "Unknown Title");
         assert_eq!(info.channel, "Unknown Channel");
         assert_eq!(info.duration, 0);

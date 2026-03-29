@@ -26,6 +26,7 @@ export type CookiesBrowser =
   | "brave";
 
 export interface VideoInfo {
+  videoId: string;
   title: string;
   thumbnail: string | null;
   duration: number;
@@ -81,6 +82,7 @@ export interface Settings {
 
 export interface HistoryEntry {
   id: string;
+  videoId: string | null;
   title: string;
   url: string;
   filePath: string;
@@ -114,6 +116,7 @@ export interface QueueItem {
 }
 
 export interface PlaylistEntry {
+  videoId: string;
   url: string;
   title: string;
   duration: number | null;
@@ -127,6 +130,8 @@ export interface PlaylistInfo {
   videoCount: number;
   entries: PlaylistEntry[];
 }
+
+export type VideoStatus = "idle" | "queued" | "downloading" | "downloaded";
 
 export type TabId = "download" | "queue" | "history" | "settings" | "about";
 

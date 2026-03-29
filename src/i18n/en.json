@@ -119,6 +119,10 @@
     "waitingForOutput": "Waiting for output...",
     "downloading": "downloading"
   },
+  "status": {
+    "downloading": "▼ Downloading...",
+    "downloaded": "✓ Downloaded"
+  },
   "player": {
     "fullscreen": "Fullscreen",
     "unsupported": "This format cannot be played in the app. Open in an external player.",

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlaylistEntry {
+    pub video_id: String,
     pub url: String,
     pub title: String,
     pub duration: Option<u64>,
@@ -30,6 +31,7 @@ mod tests {
             channel: "Test Channel".to_string(),
             video_count: 1,
             entries: vec![PlaylistEntry {
+                video_id: "abc".to_string(),
                 url: "https://youtube.com/watch?v=abc".to_string(),
                 title: "Video 1".to_string(),
                 duration: Some(120),

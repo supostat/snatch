@@ -44,6 +44,14 @@ impl HistoryService {
         self.entries.clone()
     }
 
+    pub fn get_video_ids(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .filter_map(|entry| entry.video_id.clone())
+            .filter(|video_id| !video_id.is_empty())
+            .collect()
+    }
+
     pub fn add(&mut self, entry: HistoryEntry) -> Result<(), AppError> {
         self.entries.insert(0, entry);
         self.entries.truncate(MAX_ENTRIES);
@@ -118,6 +126,7 @@ mod tests {
     fn make_entry(id: &str, title: &str) -> HistoryEntry {
         HistoryEntry {
             id: id.to_string(),
+            video_id: Some(format!("vid_{id}")),
             title: title.to_string(),
             url: "https://www.youtube.com/watch?v=test".to_string(),
             file_path: "/tmp/test.mp4".to_string(),
@@ -128,6 +137,29 @@ mod tests {
             downloaded_at: "2024-01-01T00:00:00Z".to_string(),
             thumbnail: None,
         }
+    }
+
+    #[test]
+    fn get_video_ids_returns_non_empty_ids() {
+        let path = temp_history_path();
+        let mut service = HistoryService::load_or_recreate(&path);
+
+        let mut entry_with_id = make_entry("1", "With ID");
+        entry_with_id.video_id = Some("dQw4w9WgXcQ".to_string());
+        service.add(entry_with_id).expect("add");
+
+        let mut entry_without_id = make_entry("2", "Without ID");
+        entry_without_id.video_id = None;
+        service.add(entry_without_id).expect("add");
+
+        let mut entry_empty_id = make_entry("3", "Empty ID");
+        entry_empty_id.video_id = Some(String::new());
+        service.add(entry_empty_id).expect("add");
+
+        let video_ids = service.get_video_ids();
+        assert_eq!(video_ids.len(), 1);
+        assert_eq!(video_ids[0], "dQw4w9WgXcQ");
+        cleanup(&path);
     }
 
     #[test]

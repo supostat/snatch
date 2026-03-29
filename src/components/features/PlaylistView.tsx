@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useI18n } from "../../hooks/useI18n";
-import type { PlaylistEntry, PlaylistInfo, QualityPreset } from "../../lib/types";
+import { useVideoStatus } from "../../hooks/useVideoStatus";
+import type { PlaylistEntry, PlaylistInfo, QualityPreset, VideoStatus } from "../../lib/types";
+import { useAppStore } from "../../stores/app-store";
 import { HackerButton } from "../shared/HackerButton";
 import { HackerCard } from "../shared/HackerCard";
 
@@ -21,13 +23,48 @@ function formatDuration(seconds: number | null): string {
   return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
 
+function PlaylistEntryStatusBadge({ videoId }: { videoId: string }) {
+  const status: VideoStatus = useVideoStatus(videoId);
+  const { t } = useI18n();
+
+  if (status === "idle") return null;
+
+  return (
+    <span
+      className={`font-mono text-[9px] shrink-0 ${
+        status === "downloading"
+          ? "text-[var(--accent)] animate-pulse"
+          : "text-hacker-text-dim"
+      }`}
+    >
+      {status === "downloading" ? t("status.downloading") : t("status.downloaded")}
+    </span>
+  );
+}
+
+function isVideoUnavailable(videoId: string, historyVideoIds: Set<string>, downloadingVideoIds: Set<string>): boolean {
+  return historyVideoIds.has(videoId) || downloadingVideoIds.has(videoId);
+}
+
 export function PlaylistView({ playlist, onAddToQueue, quality }: PlaylistViewProps) {
   const { t } = useI18n();
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(
-    () => new Set(playlist.entries.map((_, index) => index)),
-  );
+  const historyVideoIds = useAppStore((state) => state.historyVideoIds);
+  const downloadingVideoIds = useAppStore((state) => state.downloadingVideoIds);
+
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => {
+    const available = new Set<number>();
+    playlist.entries.forEach((entry, index) => {
+      if (!isVideoUnavailable(entry.videoId, historyVideoIds, downloadingVideoIds)) {
+        available.add(index);
+      }
+    });
+    return available;
+  });
 
   function toggleEntry(index: number) {
+    const entry = playlist.entries[index];
+    if (!entry || isVideoUnavailable(entry.videoId, historyVideoIds, downloadingVideoIds)) return;
+
     setSelectedIds((previous) => {
       const next = new Set(previous);
       if (next.has(index)) {
@@ -40,7 +77,13 @@ export function PlaylistView({ playlist, onAddToQueue, quality }: PlaylistViewPr
   }
 
   function selectAll() {
-    setSelectedIds(new Set(playlist.entries.map((_, index) => index)));
+    const available = new Set<number>();
+    playlist.entries.forEach((entry, index) => {
+      if (!isVideoUnavailable(entry.videoId, historyVideoIds, downloadingVideoIds)) {
+        available.add(index);
+      }
+    });
+    setSelectedIds(available);
   }
 
   function deselectAll() {
@@ -49,9 +92,9 @@ export function PlaylistView({ playlist, onAddToQueue, quality }: PlaylistViewPr
 
   function handleAddToQueue() {
     const selectedEntries = playlist.entries.filter((_, index) => selectedIds.has(index));
-    if (selectedEntries.length > 0) {
-      onAddToQueue(selectedEntries, quality);
-    }
+    if (selectedEntries.length === 0) return;
+    onAddToQueue(selectedEntries, quality);
+    setSelectedIds(new Set());
   }
 
   return (
@@ -97,14 +140,19 @@ export function PlaylistView({ playlist, onAddToQueue, quality }: PlaylistViewPr
 
       {/* Video list */}
       <div className="max-h-80 overflow-y-auto space-y-0.5">
-        {playlist.entries.map((entry, index) => (
+        {playlist.entries.map((entry, index) => {
+          const unavailable = isVideoUnavailable(entry.videoId, historyVideoIds, downloadingVideoIds);
+
+          return (
           <button
             key={`${entry.url}-${index}`}
             onClick={() => toggleEntry(index)}
-            className={`w-full flex items-center gap-2 px-2 py-1.5 text-left cursor-pointer transition-colors duration-150
-              ${selectedIds.has(index)
-                ? "bg-[var(--accent)]/5 text-[var(--accent)]"
-                : "text-hacker-text-dim hover:text-hacker-text"
+            className={`w-full flex items-center gap-2 px-2 py-1.5 text-left transition-colors duration-150
+              ${unavailable
+                ? "opacity-40 cursor-default"
+                : selectedIds.has(index)
+                  ? "bg-[var(--accent)]/5 text-[var(--accent)] cursor-pointer"
+                  : "text-hacker-text-dim hover:text-hacker-text cursor-pointer"
               }`}
           >
             {/* Checkbox */}
@@ -139,12 +187,16 @@ export function PlaylistView({ playlist, onAddToQueue, quality }: PlaylistViewPr
               {entry.title}
             </span>
 
+            {/* Status badge */}
+            <PlaylistEntryStatusBadge videoId={entry.videoId} />
+
             {/* Duration */}
             <span className="font-mono text-[10px] opacity-50 shrink-0">
               {formatDuration(entry.duration)}
             </span>
           </button>
-        ))}
+          );
+        })}
       </div>
     </HackerCard>
   );

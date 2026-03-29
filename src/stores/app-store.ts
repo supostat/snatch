@@ -15,6 +15,8 @@ interface AppState {
   isBinaryDownloading: boolean;
   downloadActive: boolean;
   pendingQueueUrls: PendingQueueUrls | null;
+  historyVideoIds: Set<string>;
+  downloadingVideoIds: Set<string>;
 
   setActiveTab: (tab: TabId) => void;
   setSettings: (settings: Settings) => void;
@@ -25,6 +27,11 @@ interface AppState {
   setDownloadActive: (active: boolean) => void;
   setQueueUrls: (urls: string[], quality: QualityPreset) => void;
   consumeQueueUrls: () => PendingQueueUrls | null;
+  setHistoryVideoIds: (ids: Set<string>) => void;
+  addHistoryVideoId: (videoId: string) => void;
+  setDownloadingVideoIds: (ids: Set<string>) => void;
+  addDownloadingVideoId: (videoId: string) => void;
+  removeDownloadingVideoId: (videoId: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -36,6 +43,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   isBinaryDownloading: false,
   downloadActive: false,
   pendingQueueUrls: null,
+  historyVideoIds: new Set(),
+  downloadingVideoIds: new Set(),
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSettings: (settings) => set({ settings }),
@@ -51,5 +60,24 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ pendingQueueUrls: null });
     }
     return pending;
+  },
+  setHistoryVideoIds: (ids) => set({ historyVideoIds: ids }),
+  addHistoryVideoId: (videoId) => {
+    if (!videoId) return;
+    const next = new Set(get().historyVideoIds);
+    next.add(videoId);
+    set({ historyVideoIds: next });
+  },
+  setDownloadingVideoIds: (ids) => set({ downloadingVideoIds: ids }),
+  addDownloadingVideoId: (videoId) => {
+    if (!videoId) return;
+    const next = new Set(get().downloadingVideoIds);
+    next.add(videoId);
+    set({ downloadingVideoIds: next });
+  },
+  removeDownloadingVideoId: (videoId) => {
+    const next = new Set(get().downloadingVideoIds);
+    next.delete(videoId);
+    set({ downloadingVideoIds: next });
   },
 }));

@@ -54,6 +54,9 @@ export function useDownload(): UseDownloadReturn {
   const lastLabelRef = useRef<string>("");
   const settings = useAppStore((state) => state.settings);
   const setDownloadActive = useAppStore((state) => state.setDownloadActive);
+  const addDownloadingVideoId = useAppStore((state) => state.addDownloadingVideoId);
+  const removeDownloadingVideoId = useAppStore((state) => state.removeDownloadingVideoId);
+  const addHistoryVideoId = useAppStore((state) => state.addHistoryVideoId);
 
   useEffect(() => {
     const unlistenPromise = api.yt.onProgress((event) => {
@@ -141,6 +144,11 @@ export function useDownload(): UseDownloadReturn {
       setDownloadId(newDownloadId);
       downloadIdRef.current = newDownloadId;
 
+      const currentVideoId = videoInfoRef.current?.videoId ?? "";
+      if (currentVideoId) {
+        addDownloadingVideoId(currentVideoId);
+      }
+
       try {
         const downloadResult = await api.yt.download({
           downloadId: newDownloadId,
@@ -158,6 +166,7 @@ export function useDownload(): UseDownloadReturn {
           const videoInfo = videoInfoRef.current;
           const historyEntry: HistoryEntry = {
             id: newDownloadId,
+            videoId: videoInfo.videoId || null,
             title: videoInfo.title,
             url,
             filePath: downloadResult.filePath ?? "",
@@ -169,6 +178,9 @@ export function useDownload(): UseDownloadReturn {
             thumbnail: videoInfo.thumbnail,
           };
           api.history.add(historyEntry).catch(() => {});
+          if (videoInfo.videoId) {
+            addHistoryVideoId(videoInfo.videoId);
+          }
         }
 
         if (!downloadResult.success && downloadResult.error) {
@@ -180,9 +192,12 @@ export function useDownload(): UseDownloadReturn {
         setIsDownloading(false);
         setDownloadActive(false);
         downloadIdRef.current = null;
+        if (currentVideoId) {
+          removeDownloadingVideoId(currentVideoId);
+        }
       }
     },
-    [settings, setDownloadActive],
+    [settings, setDownloadActive, addDownloadingVideoId, removeDownloadingVideoId, addHistoryVideoId],
   );
 
   const cancel = useCallback(async () => {

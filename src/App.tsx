@@ -10,6 +10,7 @@ export function App() {
   const setYtdlpAvailable = useAppStore((state) => state.setYtdlpAvailable);
   const setYtdlpVersion = useAppStore((state) => state.setYtdlpVersion);
   const setFfmpegAvailable = useAppStore((state) => state.setFfmpegAvailable);
+  const setHistoryVideoIds = useAppStore((state) => state.setHistoryVideoIds);
 
   useEffect(() => {
     async function initialize() {
@@ -23,10 +24,16 @@ export function App() {
         setYtdlpAvailable(false);
         setFfmpegAvailable(false);
       }
+      try {
+        const videoIds = await api.history.getVideoIds();
+        setHistoryVideoIds(new Set(videoIds));
+      } catch {
+        // History index stays empty on error
+      }
       await getCurrentWindow().show();
     }
     initialize();
-  }, [loadSettings, setYtdlpAvailable, setYtdlpVersion, setFfmpegAvailable]);
+  }, [loadSettings, setYtdlpAvailable, setYtdlpVersion, setFfmpegAvailable, setHistoryVideoIds]);
 
   const settings = useAppStore((state) => state.settings);
   const theme = settings?.theme ?? "green";

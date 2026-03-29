@@ -44,6 +44,8 @@ export const api = {
   history: {
     getAll: () => invoke<HistoryEntry[]>("history_get_all"),
 
+    getVideoIds: () => invoke<string[]>("history_get_video_ids"),
+
     add: (entry: HistoryEntry) =>
       invoke<void>("history_add", { entry }),
 

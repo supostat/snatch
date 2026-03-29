@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct HistoryEntry {
     pub id: String,
+    #[serde(default)]
+    pub video_id: Option<String>,
     pub title: String,
     pub url: String,
     pub file_path: String,
@@ -23,6 +25,7 @@ mod tests {
     fn camelcase_roundtrip() {
         let entry = HistoryEntry {
             id: "550e8400-e29b-41d4-a716-446655440000".to_string(),
+            video_id: Some("dQw4w9WgXcQ".to_string()),
             title: "Test Video".to_string(),
             url: "https://www.youtube.com/watch?v=test".to_string(),
             file_path: "/tmp/test.mp4".to_string(),
@@ -35,6 +38,7 @@ mod tests {
         };
 
         let json = serde_json::to_string(&entry).expect("serialize");
+        assert!(json.contains("\"videoId\""));
         assert!(json.contains("\"filePath\""));
         assert!(json.contains("\"fileSize\""));
         assert!(json.contains("\"downloadedAt\""));
@@ -43,6 +47,7 @@ mod tests {
 
         let deserialized: HistoryEntry = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(deserialized.id, entry.id);
+        assert_eq!(deserialized.video_id, Some("dQw4w9WgXcQ".to_string()));
         assert_eq!(deserialized.title, "Test Video");
         assert_eq!(deserialized.file_size, Some(104857600));
     }
@@ -58,6 +63,7 @@ mod tests {
             "downloadedAt": "2024-01-01T00:00:00Z"
         }"#;
         let entry: HistoryEntry = serde_json::from_str(json).expect("deserialize");
+        assert!(entry.video_id.is_none());
         assert!(entry.file_size.is_none());
         assert!(entry.duration.is_none());
         assert!(entry.channel.is_none());

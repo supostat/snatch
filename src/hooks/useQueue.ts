@@ -38,12 +38,19 @@ function updateItem(
   );
 }
 
+interface ProcessItemDeps {
+  downloadDir: string;
+  embedThumbnail: boolean;
+  embedMetadata: boolean;
+  cookiesBrowser: CookiesBrowser;
+}
+
 async function processItem(
   itemId: string,
   itemsRef: ItemsRef,
   setItems: React.Dispatch<React.SetStateAction<QueueItem[]>>,
   downloadIdMap: React.RefObject<Map<string, string>>,
-  settings: { downloadDir: string; embedThumbnail: boolean; embedMetadata: boolean; cookiesBrowser: CookiesBrowser },
+  settings: ProcessItemDeps,
   advanceQueue: () => void,
 ): Promise<void> {
   const item = itemsRef.current.find((queued) => queued.id === itemId);
@@ -51,9 +58,15 @@ async function processItem(
 
   setItems((previous) => updateItem(previous, itemId, { status: "fetching", error: null }));
 
+  let videoId = "";
   try {
     const videoInfo = await api.yt.getInfo(item.url, settings.cookiesBrowser);
+    videoId = videoInfo.videoId;
     setItems((previous) => updateItem(previous, itemId, { videoInfo, status: "downloading" }));
+
+    if (videoId) {
+      useAppStore.getState().addDownloadingVideoId(videoId);
+    }
 
     const downloadId = crypto.randomUUID();
     downloadIdMap.current.set(downloadId, itemId);
@@ -76,6 +89,7 @@ async function processItem(
       if (videoInfo) {
         api.history.add({
           id: downloadId,
+          videoId: videoInfo.videoId || null,
           title: videoInfo.title,
           url: item.url,
           filePath: result.filePath ?? "",
@@ -86,6 +100,9 @@ async function processItem(
           downloadedAt: new Date().toISOString(),
           thumbnail: videoInfo.thumbnail,
         }).catch(() => {});
+        if (videoId) {
+          useAppStore.getState().addHistoryVideoId(videoId);
+        }
       }
     } else {
       setItems((previous) =>
@@ -106,6 +123,9 @@ async function processItem(
       }),
     );
   } finally {
+    if (videoId) {
+      useAppStore.getState().removeDownloadingVideoId(videoId);
+    }
     advanceQueue();
   }
 }

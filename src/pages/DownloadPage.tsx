@@ -8,10 +8,12 @@ import { VideoPlayer } from "../components/features/VideoPlayer";
 import { VideoPreview } from "../components/features/VideoPreview";
 import { MultiProgress } from "../components/shared/RetroProgress";
 import { TermLog } from "../components/shared/TermLog";
+import { VideoStatusBadge } from "../components/shared/VideoStatusBadge";
 import { useClipboard } from "../hooks/useClipboard";
 import { useDownload } from "../hooks/useDownload";
 import { useI18n } from "../hooks/useI18n";
 import { useTermLog } from "../hooks/useTermLog";
+import { useVideoStatus } from "../hooks/useVideoStatus";
 import { api } from "../lib/bindings";
 import { getQualityPresets } from "../lib/constants";
 import type { PlaylistEntry, PlaylistInfo, QualityPreset } from "../lib/types";
@@ -35,6 +37,8 @@ export function DownloadPage() {
   const setActiveTab = useAppStore((state) => state.setActiveTab);
   const isDepsReady = isYtdlpAvailable && isFfmpegAvailable;
   const settings = useAppStore((state) => state.settings);
+  const videoStatus = useVideoStatus(download.videoInfo?.videoId);
+  const isAlreadyDownloadedOrActive = videoStatus === "downloaded" || videoStatus === "downloading";
 
   const handleClipboardUrl = useCallback((newUrl: string) => {
     setClipboardUrl(newUrl);
@@ -54,6 +58,7 @@ export function DownloadPage() {
         const cookiesBrowser = settings?.cookiesBrowser ?? "none";
         const info = await api.yt.getPlaylistInfo(inputUrl, cookiesBrowser);
         setPlaylistInfo(info);
+        clearLog();
       } catch (error) {
         addLine(`${t("download.errorPrefix")}${error instanceof Error ? error.message : String(error)}`);
       } finally {
@@ -82,8 +87,13 @@ export function DownloadPage() {
 
   function handleAddPlaylistToQueue(entries: PlaylistEntry[], selectedQuality: QualityPreset) {
     const queueUrls = entries.map((entry) => entry.url);
-    // Store URLs and switch to queue tab — the queue page will process them
-    useAppStore.getState().setQueueUrls(queueUrls, selectedQuality);
+    const store = useAppStore.getState();
+    for (const entry of entries) {
+      if (entry.videoId) {
+        store.addDownloadingVideoId(entry.videoId);
+      }
+    }
+    store.setQueueUrls(queueUrls, selectedQuality);
     setActiveTab("queue");
   }
 
@@ -114,7 +124,12 @@ export function DownloadPage() {
       )}
 
       {/* Single video view */}
-      {download.videoInfo && !playlistInfo && <VideoPreview videoInfo={download.videoInfo} />}
+      {download.videoInfo && !playlistInfo && (
+        <div className="flex flex-col gap-1">
+          <VideoPreview videoInfo={download.videoInfo} />
+          <VideoStatusBadge videoId={download.videoInfo.videoId} />
+        </div>
+      )}
 
       {download.videoInfo && !playlistInfo && !download.result?.success && (
         <div className="flex items-center gap-4">
@@ -127,7 +142,7 @@ export function DownloadPage() {
             isDownloading={download.isDownloading}
             onStart={handleStartDownload}
             onCancel={handleCancel}
-            disabled={!download.videoInfo}
+            disabled={!download.videoInfo || isAlreadyDownloadedOrActive}
           />
         </div>
       )}
@@ -151,7 +166,7 @@ export function DownloadPage() {
         <VideoPlayer filePath={download.result.filePath} />
       )}
 
-      {!download.result?.success && (
+      {!download.result?.success && lines.length > 0 && (
         <TermLog lines={lines} maxHeight="180px" />
       )}
     </div>
