@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use futures_util::StreamExt;
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 use tauri::{AppHandle, Emitter};
 
 use crate::error::AppError;
@@ -70,6 +71,113 @@ fn download_url(kind: BinaryKind, platform: &PlatformTarget) -> Result<String, A
     Ok(url.to_string())
 }
 
+fn checksum_url(kind: BinaryKind) -> &'static str {
+    match kind {
+        BinaryKind::YtDlp => {
+            "https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS"
+        }
+        BinaryKind::Ffmpeg => {
+            "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/checksums.sha256"
+        }
+    }
+}
+
+fn binary_filename(kind: BinaryKind, platform: &PlatformTarget) -> &'static str {
+    match kind {
+        BinaryKind::YtDlp => match (platform.os, platform.arch) {
+            ("macos", _) => "yt-dlp_macos",
+            ("linux", "x86_64") => "yt-dlp_linux",
+            ("linux", "aarch64") => "yt-dlp_linux_aarch64",
+            ("windows", _) => "yt-dlp.exe",
+            _ => "yt-dlp",
+        },
+        BinaryKind::Ffmpeg => match (platform.os, platform.arch) {
+            ("macos", _) => "ffmpeg-master-latest-macos64-gpl.zip",
+            ("linux", "x86_64") => "ffmpeg-master-latest-linux64-gpl.tar.xz",
+            ("linux", "aarch64") => "ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
+            ("windows", _) => "ffmpeg-master-latest-win64-gpl.zip",
+            _ => "ffmpeg",
+        },
+    }
+}
+
+fn compute_sha256(data: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(data);
+    format!("{:x}", hasher.finalize())
+}
+
+fn parse_checksum_for_file(checksum_content: &str, filename: &str) -> Option<String> {
+    for line in checksum_content.lines() {
+        // Format: "<hash>  <filename>" (two spaces)
+        if let Some((hash, name)) = line.split_once("  ") {
+            if name.trim() == filename {
+                return Some(hash.trim().to_lowercase());
+            }
+        }
+    }
+    None
+}
+
+async fn fetch_and_verify_checksum(
+    client: &reqwest::Client,
+    kind: BinaryKind,
+    platform: &PlatformTarget,
+    downloaded_bytes: &[u8],
+) -> Result<(), AppError> {
+    let url = checksum_url(kind);
+    let filename = binary_filename(kind, platform);
+
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| AppError::BinaryDownload(format!("checksum download failed: {e}")))?;
+
+    if !response.status().is_success() {
+        tracing::warn!(
+            "checksum file unavailable (HTTP {}), skipping verification for {}",
+            response.status(),
+            kind.name()
+        );
+        return Ok(());
+    }
+
+    let checksum_content = response
+        .text()
+        .await
+        .map_err(|e| AppError::BinaryDownload(format!("checksum read failed: {e}")))?;
+
+    let expected_hash = match parse_checksum_for_file(&checksum_content, filename) {
+        Some(hash) => hash,
+        None => {
+            tracing::warn!(
+                "checksum for {} not found in checksum file, skipping verification",
+                filename
+            );
+            return Ok(());
+        }
+    };
+
+    let actual_hash = compute_sha256(downloaded_bytes);
+
+    if actual_hash != expected_hash {
+        return Err(AppError::BinaryDownload(format!(
+            "SHA256 mismatch for {}: expected {}, got {}",
+            kind.name(),
+            expected_hash,
+            actual_hash,
+        )));
+    }
+
+    tracing::info!(
+        "SHA256 verified for {} ({})",
+        kind.name(),
+        &actual_hash[..16]
+    );
+    Ok(())
+}
+
 fn validate_url_domain(url: &str) -> Result<(), AppError> {
     let parsed = url::Url::parse(url)
         .map_err(|_| AppError::BinaryDownload(format!("invalid URL: {url}")))?;
@@ -113,6 +221,9 @@ pub async fn download_binary(
     emit_progress(app_handle, &binary_name, 0, None, 0.0, "downloading");
 
     let file_bytes = download_with_progress(&url, app_handle, &binary_name).await?;
+
+    let checksum_client = reqwest::Client::new();
+    fetch_and_verify_checksum(&checksum_client, kind, &platform, &file_bytes).await?;
 
     match kind {
         BinaryKind::YtDlp => {
@@ -485,5 +596,48 @@ mod tests {
     fn binary_kind_name_matches() {
         assert_eq!(BinaryKind::YtDlp.name(), "yt-dlp");
         assert_eq!(BinaryKind::Ffmpeg.name(), "ffmpeg");
+    }
+
+    #[test]
+    fn compute_sha256_produces_correct_hash() {
+        let hash = compute_sha256(b"hello world");
+        assert_eq!(
+            hash,
+            "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+        );
+    }
+
+    #[test]
+    fn parse_checksum_finds_matching_file() {
+        let content = "abc123  yt-dlp_linux\ndef456  yt-dlp_macos\nghi789  yt-dlp.exe\n";
+        assert_eq!(
+            parse_checksum_for_file(content, "yt-dlp_macos"),
+            Some("def456".to_string())
+        );
+    }
+
+    #[test]
+    fn parse_checksum_returns_none_for_missing_file() {
+        let content = "abc123  yt-dlp_linux\ndef456  yt-dlp_macos\n";
+        assert_eq!(parse_checksum_for_file(content, "yt-dlp.exe"), None);
+    }
+
+    #[test]
+    fn parse_checksum_handles_empty_content() {
+        assert_eq!(parse_checksum_for_file("", "yt-dlp"), None);
+    }
+
+    #[test]
+    fn checksum_url_returns_github_urls() {
+        assert!(checksum_url(BinaryKind::YtDlp).contains("SHA2-256SUMS"));
+        assert!(checksum_url(BinaryKind::Ffmpeg).contains("checksums.sha256"));
+    }
+
+    #[test]
+    fn binary_filename_matches_download_url() {
+        let platform = detect_platform().unwrap();
+        let url = download_url(BinaryKind::YtDlp, &platform).unwrap();
+        let filename = binary_filename(BinaryKind::YtDlp, &platform);
+        assert!(url.ends_with(filename));
     }
 }
