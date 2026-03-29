@@ -573,10 +573,18 @@ fn remove_quarantine(path: &Path) {
 }
 
 async fn verify_binary(path: &Path, version_args: &[&str]) -> Result<(), AppError> {
-    let output = tokio::process::Command::new(path)
-        .args(version_args)
+    let mut cmd = tokio::process::Command::new(path);
+    cmd.args(version_args)
         .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    }
+
+    let output = cmd
         .output()
         .await
         .map_err(|e| AppError::BinaryDownload(format!("verification failed: {e}")))?;

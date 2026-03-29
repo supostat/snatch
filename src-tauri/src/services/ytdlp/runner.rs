@@ -20,6 +20,15 @@ use super::info;
 use super::progress::{self, ProgressUpdate};
 
 const PROGRESS_THROTTLE_MS: u128 = 250;
+
+#[cfg(windows)]
+fn hide_console_window(command: &mut Command) {
+    use std::os::windows::process::CommandExt;
+    command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+}
+
+#[cfg(not(windows))]
+fn hide_console_window(_command: &mut Command) {}
 const CANCEL_GRACE_PERIOD_SECS: u64 = 5;
 
 pub struct YtdlpRunner {
@@ -80,10 +89,13 @@ impl YtdlpRunner {
         let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
         validate_ytdlp_flags(&args_refs)?;
 
-        let output = Command::new(binary)
-            .args(&args)
+        let mut cmd = Command::new(binary);
+        cmd.args(&args)
             .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped());
+        hide_console_window(&mut cmd);
+
+        let output = cmd
             .spawn()
             .map_err(|e| AppError::YtdlpFailed(format!("failed to spawn yt-dlp: {e}")))?
             .wait_with_output()
@@ -112,10 +124,13 @@ impl YtdlpRunner {
         let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
         validate_ytdlp_flags(&args_refs)?;
 
-        let output = Command::new(binary)
-            .args(&args)
+        let mut cmd = Command::new(binary);
+        cmd.args(&args)
             .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped());
+        hide_console_window(&mut cmd);
+
+        let output = cmd
             .spawn()
             .map_err(|e| AppError::YtdlpFailed(format!("failed to spawn yt-dlp: {e}")))?
             .wait_with_output()
@@ -152,10 +167,13 @@ impl YtdlpRunner {
         let args_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
         validate_ytdlp_flags(&args_refs)?;
 
-        let mut child = Command::new(&binary)
-            .args(&args)
+        let mut cmd = Command::new(&binary);
+        cmd.args(&args)
             .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped());
+        hide_console_window(&mut cmd);
+
+        let mut child = cmd
             .spawn()
             .map_err(|e| AppError::YtdlpFailed(format!("failed to spawn yt-dlp: {e}")))?;
 
