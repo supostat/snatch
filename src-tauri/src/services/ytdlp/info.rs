@@ -122,7 +122,7 @@ pub fn parse_playlist_info(json_lines: &str) -> Result<PlaylistInfo, AppError> {
                 .and_then(|thumbs| thumbs.last().and_then(|t| t.url.clone()));
 
             entries.push(PlaylistEntry {
-                video_id: video_id.clone(),
+                video_id,
                 url,
                 title,
                 duration: entry.duration.map(|d| d as u64),
