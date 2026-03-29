@@ -58,6 +58,7 @@ pub fn run() {
 
     if let Err(error) = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(app_state)
         .setup(move |app| {
             ClipboardWatcher::start(app.handle().clone(), auto_clipboard);

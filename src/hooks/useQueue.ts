@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../lib/bindings";
+import { notifyDownloadComplete, notifyQueueComplete } from "../lib/notifications";
+import { type SpeedCache, createSpeedCache, getCachedSpeed } from "../lib/speed-cache";
 import type {
   CookiesBrowser,
   DownloadProgress,
@@ -103,6 +105,7 @@ async function processItem(
         if (videoId) {
           useAppStore.getState().addHistoryVideoId(videoId);
         }
+        notifyDownloadComplete(videoInfo.title).catch(() => {});
       }
     } else {
       setItems((previous) =>
@@ -152,7 +155,16 @@ export function useQueue(): UseQueueReturn {
     const pendingItems = currentItems.filter((item) => item.status === "pending");
     const toStart = pendingItems.slice(0, slotsAvailable);
 
-    if (toStart.length === 0) return;
+    if (toStart.length === 0) {
+      if (activeCount === 0 && currentItems.length > 0) {
+        const doneCount = currentItems.filter((item) => item.status === "done").length;
+        const errorCount = currentItems.filter((item) => item.status === "error").length;
+        if (doneCount + errorCount > 0) {
+          notifyQueueComplete(doneCount, errorCount).catch(() => {});
+        }
+      }
+      return;
+    }
 
     for (const item of toStart) {
       const resolvedSettings = {
@@ -166,6 +178,7 @@ export function useQueue(): UseQueueReturn {
   }, [maxConcurrent, settings]);
 
   const lastLabelsRef = useRef<Map<string, string>>(new Map());
+  const speedCachesRef = useRef<Map<string, SpeedCache>>(new Map());
 
   useEffect(() => {
     const unlistenPromise = api.yt.onProgress((progressEvent: DownloadProgress) => {
@@ -184,6 +197,11 @@ export function useQueue(): UseQueueReturn {
         const lastLabel = lastLabelsRef.current.get(queueItemId) ?? "";
         const isNewStage = label !== lastLabel && lastLabel !== "";
 
+        if (!speedCachesRef.current.has(queueItemId)) {
+          speedCachesRef.current.set(queueItemId, createSpeedCache());
+        }
+        const speed = getCachedSpeed(speedCachesRef.current.get(queueItemId)!, progressEvent.speed);
+
         let stages = [...item.progressStages];
 
         if (isNewStage) {
@@ -193,7 +211,7 @@ export function useQueue(): UseQueueReturn {
           stages.push({
             label,
             percent: progressEvent.percent,
-            speed: progressEvent.speed,
+            speed,
             eta: progressEvent.eta,
             completed: progressEvent.stage === "done",
           });
@@ -201,7 +219,7 @@ export function useQueue(): UseQueueReturn {
           stages.push({
             label,
             percent: progressEvent.percent,
-            speed: progressEvent.speed,
+            speed,
             eta: progressEvent.eta,
             completed: progressEvent.stage === "done",
           });
@@ -209,7 +227,7 @@ export function useQueue(): UseQueueReturn {
           stages[stages.length - 1] = {
             label,
             percent: progressEvent.percent,
-            speed: progressEvent.speed,
+            speed,
             eta: progressEvent.eta,
             completed: progressEvent.stage === "done",
           };

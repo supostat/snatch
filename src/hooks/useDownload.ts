@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../lib/bindings";
+import { notifyDownloadComplete } from "../lib/notifications";
+import { type SpeedCache, createSpeedCache, getCachedSpeed } from "../lib/speed-cache";
 import type {
   CookiesBrowser,
   DownloadProgress,
@@ -52,6 +54,7 @@ export function useDownload(): UseDownloadReturn {
   const downloadIdRef = useRef<string | null>(null);
   const videoInfoRef = useRef<VideoInfo | null>(null);
   const lastLabelRef = useRef<string>("");
+  const speedCacheRef = useRef<SpeedCache>(createSpeedCache());
   const settings = useAppStore((state) => state.settings);
   const setDownloadActive = useAppStore((state) => state.setDownloadActive);
   const addDownloadingVideoId = useAppStore((state) => state.addDownloadingVideoId);
@@ -64,17 +67,17 @@ export function useDownload(): UseDownloadReturn {
 
       const label = buildStageLabel(event);
       const isNewStage = label !== lastLabelRef.current;
+      const speed = getCachedSpeed(speedCacheRef.current, event.speed);
 
       setProgressStages((previous) => {
         if (isNewStage && lastLabelRef.current !== "") {
-          // Mark previous stage as completed, add new current
           const completed = previous.map((stage) =>
             stage.completed ? stage : { ...stage, percent: 100, speed: null, eta: null, completed: true },
           );
           lastLabelRef.current = label;
           return [
             ...completed,
-            { label, percent: event.percent, speed: event.speed, eta: event.eta, completed: event.stage === "done" },
+            { label, percent: event.percent, speed, eta: event.eta, completed: event.stage === "done" },
           ];
         }
 
@@ -82,16 +85,15 @@ export function useDownload(): UseDownloadReturn {
           lastLabelRef.current = label;
         }
 
-        // Update current (last) stage
         if (previous.length === 0) {
-          return [{ label, percent: event.percent, speed: event.speed, eta: event.eta, completed: event.stage === "done" }];
+          return [{ label, percent: event.percent, speed, eta: event.eta, completed: event.stage === "done" }];
         }
 
         const updated = [...previous];
         updated[updated.length - 1] = {
           label,
           percent: event.percent,
-          speed: event.speed,
+          speed,
           eta: event.eta,
           completed: event.stage === "done",
         };
@@ -137,6 +139,7 @@ export function useDownload(): UseDownloadReturn {
       setResult(null);
       setProgressStages([]);
       lastLabelRef.current = "";
+      speedCacheRef.current = createSpeedCache();
       setIsDownloading(true);
       setDownloadActive(true);
 
@@ -181,6 +184,7 @@ export function useDownload(): UseDownloadReturn {
           if (videoInfo.videoId) {
             addHistoryVideoId(videoInfo.videoId);
           }
+          notifyDownloadComplete(videoInfo.title).catch(() => {});
         }
 
         if (!downloadResult.success && downloadResult.error) {
