@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNATCH — YouTube Video Downloader</title>
+  <meta name="description" content="Fast, lightweight YouTube video downloader with retro hacker aesthetic. Built with Tauri and Rust.">
+  <meta property="og:title" content="SNATCH — YouTube Video Downloader">
+  <meta property="og:description" content="Fast, lightweight YouTube video downloader with retro hacker aesthetic.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="img/icon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="matrix-rain"></canvas>
+
+  <div class="scanlines"></div>
+
+  <div class="container">
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-logo">
+        <img src="img/logo.png" alt="SNATCH" width="200" height="280">
+      </div>
+      <h1 class="glitch" data-text="SNATCH">SNATCH</h1>
+      <p class="tagline">YouTube video downloader with retro hacker aesthetic</p>
+      <p class="subtitle">Fast. Lightweight. Open source.</p>
+
+      <div class="download-buttons" id="download-buttons">
+        <a href="#" class="btn btn-primary" id="btn-macos" data-os="macos">
+          <span class="btn-icon">&#9733;</span> Download for macOS
+        </a>
+        <a href="#" class="btn btn-primary" id="btn-windows" data-os="windows">
+          <span class="btn-icon">&#9632;</span> Download for Windows
+        </a>
+        <a href="#" class="btn btn-primary" id="btn-linux" data-os="linux">
+          <span class="btn-icon">&#9654;</span> Download for Linux
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <a href="https://github.com/supostat/snatch/releases" class="link">All releases</a>
+        <span class="separator">|</span>
+        <a href="https://github.com/supostat/snatch" class="link">Source code</a>
+        <span class="separator">|</span>
+        <span class="version" id="version">v1.1.1</span>
+      </div>
+    </header>
+
+    <!-- SCREENSHOT -->
+    <section class="section" id="preview">
+      <div class="preview-tabs">
+        <button class="preview-tab active" data-target="preview-1">[ home ]</button>
+        <button class="preview-tab" data-target="preview-2">[ fetch ]</button>
+        <button class="preview-tab" data-target="preview-3">[ download ]</button>
+        <button class="preview-tab" data-target="preview-4">[ player ]</button>
+        <button class="preview-tab" data-target="preview-5">[ history ]</button>
+        <button class="preview-tab" data-target="preview-6">[ settings ]</button>
+        <button class="preview-tab" data-target="preview-7">[ about ]</button>
+      </div>
+      <div class="screenshot-frame">
+        <img src="img/screenshot1.png" alt="SNATCH — home screen" class="screenshot" id="preview-1">
+        <img src="img/screenshot2.png" alt="SNATCH — video info" class="screenshot hidden" id="preview-2">
+        <img src="img/screenshot3.png" alt="SNATCH — downloading" class="screenshot hidden" id="preview-3">
+        <img src="img/screenshot4.png" alt="SNATCH — video player" class="screenshot hidden" id="preview-4">
+        <img src="img/screenshot5.png" alt="SNATCH — history" class="screenshot hidden" id="preview-5">
+        <img src="img/screenshot6.png" alt="SNATCH — settings" class="screenshot hidden" id="preview-6">
+        <img src="img/screenshot7.png" alt="SNATCH — about" class="screenshot hidden" id="preview-7">
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="features">
+      <h2 class="section-title">&gt; features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#9660;</div>
+          <h3>Video &amp; Audio</h3>
+          <p>Download in any quality from 480p to 4K, or extract audio as MP3. Powered by yt-dlp.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9776;</div>
+          <h3>Playlist Support</h3>
+          <p>Fetch entire playlists, select individual videos, and queue them for batch download.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9889;</div>
+          <h3>Queue System</h3>
+          <p>Add multiple URLs, set concurrent downloads (1-5), and let it run in the background.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128274;</div>
+          <h3>Secure by Design</h3>
+          <p>URL validation, path traversal protection, yt-dlp flag whitelist, SHA256 binary verification.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9881;</div>
+          <h3>Lightweight</h3>
+          <p>~10MB binary. No Electron, no Chromium. Tauri + Rust backend with system WebView.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127912;</div>
+          <h3>Hacker Aesthetic</h3>
+          <p>CRT scanlines, matrix rain, 3 color themes (green, amber, cyan). JetBrains Mono font.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128276;</div>
+          <h3>Notifications</h3>
+          <p>Desktop notifications when downloads complete. System tray for background operation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127760;</div>
+          <h3>i18n</h3>
+          <p>English and Russian interface. Auto-detects system locale.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARISON -->
+    <section class="section" id="comparison">
+      <h2 class="section-title">&gt; snatch vs alternatives</h2>
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="highlight">SNATCH</th>
+              <th>Electron apps</th>
+              <th>CLI (yt-dlp)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Binary size</td>
+              <td class="highlight">~10 MB</td>
+              <td>~150 MB</td>
+              <td>~20 MB</td>
+            </tr>
+            <tr>
+              <td>RAM usage</td>
+              <td class="highlight">~40 MB</td>
+              <td>~300 MB</td>
+              <td>~30 MB</td>
+            </tr>
+            <tr>
+              <td>GUI</td>
+              <td class="highlight accent">&#10003;</td>
+              <td class="accent">&#10003;</td>
+              <td class="dim">&#10007;</td>
+            </tr>
+            <tr>
+              <td>Playlist UI</td>
+              <td class="highlight accent">&#10003;</td>
+              <td class="accent">&#10003;</td>
+              <td class="dim">CLI only</td>
+            </tr>
+            <tr>
+              <td>Auto-update</td>
+              <td class="highlight accent">&#10003;</td>
+              <td class="accent">&#10003;</td>
+              <td class="dim">Manual</td>
+            </tr>
+            <tr>
+              <td>Open source</td>
+              <td class="highlight accent">&#10003;</td>
+              <td>Varies</td>
+              <td class="accent">&#10003;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="section" id="stack">
+      <h2 class="section-title">&gt; tech stack</h2>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <span class="stack-label">Backend</span>
+          <span class="stack-value">Rust + Tauri 2</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">Frontend</span>
+          <span class="stack-value">React + TypeScript</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">Styling</span>
+          <span class="stack-value">Tailwind CSS 4</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">Engine</span>
+          <span class="stack-value">yt-dlp + FFmpeg</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">State</span>
+          <span class="stack-value">Zustand</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">License</span>
+          <span class="stack-value">GPL-3.0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <h2 class="section-title">&gt; faq</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Is it free?</summary>
+          <p>Yes. SNATCH is free and open source under GPL-3.0 license.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does it install yt-dlp automatically?</summary>
+          <p>Yes. On first launch, SNATCH downloads yt-dlp and FFmpeg automatically with SHA256 verification.</p>
+        </details>
+        <details class="faq-item">
+          <summary>macOS says the app is damaged or unverified</summary>
+          <p>Run <code>xattr -cr /Applications/SNATCH.app</code> in Terminal. This removes the quarantine flag. We're working on Apple code signing.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I download playlists?</summary>
+          <p>Yes. Paste a playlist URL, select the videos you want, choose quality, and add them to the queue.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does it support other sites besides YouTube?</summary>
+          <p>SNATCH uses yt-dlp which supports 1800+ sites, but the URL validator currently only allows YouTube domains.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Where are downloaded files saved?</summary>
+          <p>By default in your Downloads folder. You can change it in Settings.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CHANGELOG -->
+    <section class="section" id="changelog">
+      <h2 class="section-title">&gt; changelog</h2>
+      <div class="changelog">
+        <div class="changelog-entry">
+          <div class="changelog-version">v1.1.1</div>
+          <div class="changelog-date">2026-03-29</div>
+          <ul>
+            <li>Fix: Hide console window on Windows when spawning yt-dlp</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <div class="changelog-version">v1.1.0</div>
+          <div class="changelog-date">2026-03-29</div>
+          <ul>
+            <li>Video status tracking across pages (downloaded/downloading badges)</li>
+            <li>System notifications for completed downloads</li>
+            <li>System tray with minimize-to-tray</li>
+            <li>Auto-updater with signed artifacts</li>
+            <li>Download speed limiter</li>
+            <li>SHA256 checksum verification for binary downloads</li>
+            <li>Speed display caching to prevent flickering</li>
+            <li>Fix: macOS FFmpeg download source</li>
+            <li>Fix: Playlist duplicate queue prevention</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <div class="changelog-version">v1.0.0</div>
+          <div class="changelog-date">2026-03-27</div>
+          <ul>
+            <li>Initial release</li>
+            <li>Single video and playlist downloads</li>
+            <li>Queue system with concurrent downloads</li>
+            <li>History with file manager (grid/list view)</li>
+            <li>Embedded video player</li>
+            <li>3 color themes, CRT effects, matrix rain</li>
+            <li>English and Russian interface</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-content">
+        <p>Built by <a href="https://byigor.dev" class="link">byigor.dev</a></p>
+        <p class="footer-links">
+          <a href="https://github.com/supostat/snatch" class="link">GitHub</a>
+          <span class="separator">|</span>
+          <a href="https://github.com/supostat/snatch/releases" class="link">Releases</a>
+          <span class="separator">|</span>
+          <a href="https://github.com/supostat/snatch/issues" class="link">Issues</a>
+        </p>
+        <p class="copyright">&copy; 2026 SNATCH. GPL-3.0 License.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
