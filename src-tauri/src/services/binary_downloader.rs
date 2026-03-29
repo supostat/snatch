@@ -49,7 +49,11 @@ fn detect_platform() -> Result<PlatformTarget, AppError> {
     }
 }
 
-const ALLOWED_DOMAINS: &[&str] = &["github.com", "objects.githubusercontent.com"];
+const ALLOWED_DOMAINS: &[&str] = &[
+    "github.com",
+    "objects.githubusercontent.com",
+    "release-assets.githubusercontent.com",
+];
 
 fn download_url(kind: BinaryKind, platform: &PlatformTarget) -> Result<String, AppError> {
     let url = match kind {
@@ -61,7 +65,8 @@ fn download_url(kind: BinaryKind, platform: &PlatformTarget) -> Result<String, A
             _ => return Err(AppError::UnsupportedPlatform(format!("{}-{}", platform.os, platform.arch))),
         },
         BinaryKind::Ffmpeg => match (platform.os, platform.arch) {
-            ("macos", _) => "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-macos64-gpl.zip",
+            ("macos", "aarch64") => "https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffmpeg-darwin-arm64",
+            ("macos", _) => "https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffmpeg-darwin-x64",
             ("linux", "x86_64") => "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
             ("linux", "aarch64") => "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
             ("windows", _) => "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
@@ -92,7 +97,8 @@ fn binary_filename(kind: BinaryKind, platform: &PlatformTarget) -> &'static str 
             _ => "yt-dlp",
         },
         BinaryKind::Ffmpeg => match (platform.os, platform.arch) {
-            ("macos", _) => "ffmpeg-master-latest-macos64-gpl.zip",
+            ("macos", "aarch64") => "ffmpeg-darwin-arm64",
+            ("macos", _) => "ffmpeg-darwin-x64",
             ("linux", "x86_64") => "ffmpeg-master-latest-linux64-gpl.tar.xz",
             ("linux", "aarch64") => "ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
             ("windows", _) => "ffmpeg-master-latest-win64-gpl.zip",
@@ -178,6 +184,18 @@ async fn fetch_and_verify_checksum(
     Ok(())
 }
 
+fn is_direct_ffmpeg_binary(platform: &PlatformTarget) -> bool {
+    platform.os == "macos"
+}
+
+fn ffprobe_url(platform: &PlatformTarget) -> Option<&'static str> {
+    match (platform.os, platform.arch) {
+        ("macos", "aarch64") => Some("https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffprobe-darwin-arm64"),
+        ("macos", _) => Some("https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffprobe-darwin-x64"),
+        _ => None,
+    }
+}
+
 fn validate_url_domain(url: &str) -> Result<(), AppError> {
     let parsed = url::Url::parse(url)
         .map_err(|_| AppError::BinaryDownload(format!("invalid URL: {url}")))?;
@@ -256,6 +274,44 @@ pub async fn download_binary(
             );
 
             Ok(dest)
+        }
+        BinaryKind::Ffmpeg if is_direct_ffmpeg_binary(&platform) => {
+            let ffmpeg_dest = destination_dir.join("ffmpeg");
+            std::fs::write(&ffmpeg_dest, &file_bytes)
+                .map_err(|e| AppError::BinaryDownload(format!("failed to write ffmpeg: {e}")))?;
+            make_executable(&ffmpeg_dest)?;
+            remove_quarantine(&ffmpeg_dest);
+
+            if let Some(ffprobe_download_url) = ffprobe_url(&platform) {
+                let ffprobe_bytes =
+                    download_with_progress(ffprobe_download_url, app_handle, "ffprobe").await?;
+                let ffprobe_dest = destination_dir.join("ffprobe");
+                std::fs::write(&ffprobe_dest, &ffprobe_bytes).map_err(|e| {
+                    AppError::BinaryDownload(format!("failed to write ffprobe: {e}"))
+                })?;
+                make_executable(&ffprobe_dest)?;
+                remove_quarantine(&ffprobe_dest);
+            }
+
+            emit_progress(
+                app_handle,
+                &binary_name,
+                file_bytes.len() as u64,
+                Some(file_bytes.len() as u64),
+                100.0,
+                "verifying",
+            );
+            verify_binary(&ffmpeg_dest, &["-version"]).await?;
+            emit_progress(
+                app_handle,
+                &binary_name,
+                file_bytes.len() as u64,
+                Some(file_bytes.len() as u64),
+                100.0,
+                "done",
+            );
+
+            Ok(ffmpeg_dest)
         }
         BinaryKind::Ffmpeg => {
             emit_progress(
@@ -577,7 +633,7 @@ mod tests {
     fn download_url_ffmpeg_returns_github_url() {
         let platform = detect_platform().unwrap();
         let url = download_url(BinaryKind::Ffmpeg, &platform).unwrap();
-        assert!(url.starts_with("https://github.com/yt-dlp/FFmpeg-Builds/"));
+        assert!(url.starts_with("https://github.com/"));
     }
 
     #[test]
