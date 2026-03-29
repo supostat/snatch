@@ -152,6 +152,11 @@
     "deselectAll": "Снять выбор",
     "addToQueue": "В очередь"
   },
+  "updater": {
+    "available": "Доступно обновление:",
+    "install": "ОБНОВИТЬ",
+    "installing": "УСТАНОВКА..."
+  },
   "about": {
     "version": "Версия",
     "engine": "Движок",

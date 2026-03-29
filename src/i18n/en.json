@@ -152,6 +152,11 @@
     "deselectAll": "Deselect all",
     "addToQueue": "Add to Queue"
   },
+  "updater": {
+    "available": "Update available:",
+    "install": "UPDATE",
+    "installing": "INSTALLING..."
+  },
   "about": {
     "version": "Version",
     "engine": "Engine",

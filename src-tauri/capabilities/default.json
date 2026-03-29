@@ -12,6 +12,10 @@
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-save",
-    "notification:default"
+    "notification:default",
+    "core:tray:default",
+    "core:menu:default",
+    "core:image:default",
+    "updater:default"
   ]
 }

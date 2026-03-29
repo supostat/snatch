@@ -12,8 +12,8 @@ pub async fn window_minimize(window: tauri::Window) -> Result<(), AppError> {
 #[tauri::command]
 pub async fn window_close(window: tauri::Window) -> Result<(), AppError> {
     window
-        .close()
-        .map_err(|e| AppError::Window(format!("close failed: {e}")))
+        .hide()
+        .map_err(|e| AppError::Window(format!("hide to tray failed: {e}")))
 }
 
 #[tauri::command]

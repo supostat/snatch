@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { DependencyBanner } from "../components/features/DependencyBanner";
+import { UpdateBanner } from "../components/features/UpdateBanner";
 import { DownloadButton } from "../components/features/DownloadButton";
 import { PlaylistView } from "../components/features/PlaylistView";
 import { QualityPicker } from "../components/features/QualityPicker";
@@ -99,6 +100,7 @@ export function DownloadPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4 h-full overflow-y-auto">
+      <UpdateBanner />
       <DependencyBanner />
 
       <UrlInput
