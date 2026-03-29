@@ -438,6 +438,40 @@ body {
   border: 1px solid var(--border);
 }
 
+/* ═══ ROADMAP ═══ */
+
+.roadmap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roadmap-group {
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  background: var(--bg-card);
+}
+
+.roadmap-label {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.roadmap-group ul {
+  padding-left: 20px;
+}
+
+.roadmap-group li {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
 /* ═══ CHANGELOG ═══ */
 
 .changelog {
